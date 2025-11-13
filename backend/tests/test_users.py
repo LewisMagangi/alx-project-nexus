@@ -1,8 +1,9 @@
 import pytest
 from users.models import User
 
+
 @pytest.mark.django_db
 def test_create_user():
-    user = User.objects.create(username='newuser', password='newpass')
-    assert user.username == 'newuser'
+    user = User.objects.create(username="newuser", password="newpass")
+    assert user.username == "newuser"
     assert User.objects.count() == 1

@@ -1,59 +1,61 @@
+# Minimal pre-commit config for Twitter MVP
+# Philosophy: Fast checks on commit, thorough checks on push
+
 repos:
   # -------------------------------
-  # Standard pre-commit hooks
+  # PRE-COMMIT: Quick & Essential
   # -------------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
-      - id: trailing-whitespace      # auto-fix: remove trailing spaces
-      - id: end-of-file-fixer        # auto-fix: ensure newline at EOF
-      - id: check-yaml               # lint: YAML syntax check
-      - id: check-added-large-files  # block large files
+      - id: trailing-whitespace
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        stages: [pre-commit]
+      - id: check-yaml
+        stages: [pre-commit]
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+        stages: [pre-commit]
 
-  # -------------------------------
-  # Python formatting & imports
-  # -------------------------------
+  # Auto-format Python (fast)
   - repo: https://github.com/psf/black
     rev: 24.3.0
     hooks:
       - id: black
-        language_version: python3
+        args: [--line-length=79]
+        language_version: python3.12
+        stages: [pre-commit]
 
+  # Sort imports (fast)
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
-        language_version: python3
+        args: [--profile=black, --line-length=79]
+        language_version: python3.12
+        stages: [pre-commit]
 
   # -------------------------------
-  # Python linting
+  # PRE-PUSH: Thorough Checks
   # -------------------------------
+
+  # Flake8 linting (only on push)
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
       - id: flake8
-        language_version: python3
+        args: [--max-line-length=79, --exclude=venv,migrations]
+        language_version: python3.12
+        stages: [pre-push]
 
-  - repo: https://github.com/PyCQA/pylint
-    rev: v2.20.0
-    hooks:
-      - id: pylint
-        language_version: python3
-
-  # -------------------------------
-  # Custom local hook: Django + frontend tests
-  # -------------------------------
+  # Full test suite (only on push)
   - repo: local
     hooks:
-      - id: django-and-frontend-tests
-        name: Run Django backend + frontend tests before commit
-        entry: bash .pre-commit-django-frontend-tests.sh
+      - id: run-tests
+        name: Run Django + Frontend Tests
+        entry: python .pre-commit-django-frontend-tests.py
         language: system
-        types: [python, javascript]   # trigger on both Python and JS files
-
-      - id: django-and-frontend-tests-prepush
-        name: Run full Django + frontend tests before push
-        entry: bash .pre-commit-django-frontend-tests.sh
-        language: system
-        stages: [push]               # triggers only on git push
-        always_run: true             # run on every branch
+        pass_filenames: false
+        stages: [pre-push]
+        always_run: true

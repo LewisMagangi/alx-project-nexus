@@ -1,16 +1,17 @@
 import pytest
 from django.urls import reverse
+from posts.models import Post
 from rest_framework.test import APIClient
 from users.models import User
-from posts.models import Post, Like
+
 
 @pytest.mark.django_db
 def test_like_post():
-    user = User.objects.create(username='likeuser', password='likepass')
-    post = Post.objects.create(user=user, content='Like this!')
+    user = User.objects.create(username="likeuser", password="likepass")
+    post = Post.objects.create(user=user, content="Like this!")
     client = APIClient()
-    url = reverse('like-list')
-    data = {'user': user.id, 'post': post.id}
-    response = client.post(url, data, format='json')
+    url = reverse("like-list")
+    data = {"user": user.id, "post": post.id}
+    response = client.post(url, data, format="json")
     assert response.status_code == 201
-    assert response.data['post'] == post.id
+    assert response.data["post"] == post.id
