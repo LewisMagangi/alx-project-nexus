@@ -1,0 +1,59 @@
+repos:
+  # -------------------------------
+  # Standard pre-commit hooks
+  # -------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace      # auto-fix: remove trailing spaces
+      - id: end-of-file-fixer        # auto-fix: ensure newline at EOF
+      - id: check-yaml               # lint: YAML syntax check
+      - id: check-added-large-files  # block large files
+
+  # -------------------------------
+  # Python formatting & imports
+  # -------------------------------
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        language_version: python3
+
+  # -------------------------------
+  # Python linting
+  # -------------------------------
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        language_version: python3
+
+  - repo: https://github.com/PyCQA/pylint
+    rev: v2.20.0
+    hooks:
+      - id: pylint
+        language_version: python3
+
+  # -------------------------------
+  # Custom local hook: Django + frontend tests
+  # -------------------------------
+  - repo: local
+    hooks:
+      - id: django-and-frontend-tests
+        name: Run Django backend + frontend tests before commit
+        entry: bash .pre-commit-django-frontend-tests.sh
+        language: system
+        types: [python, javascript]   # trigger on both Python and JS files
+
+      - id: django-and-frontend-tests-prepush
+        name: Run full Django + frontend tests before push
+        entry: bash .pre-commit-django-frontend-tests.sh
+        language: system
+        stages: [push]               # triggers only on git push
+        always_run: true             # run on every branch
