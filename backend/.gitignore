@@ -75,6 +75,8 @@ ENV/
 # IDEs
 .idea/
 *.swp
+.vscode/
+
 
 # MacOS
 .DS_Store
