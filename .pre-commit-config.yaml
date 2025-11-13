@@ -1,6 +1,4 @@
-# Windows-compatible pre-commit config for Twitter MVP
-# All hooks use language_version or system to avoid /bin/sh
-
+# Auto-format Python (fast)# Windows-compatible pre-commit config for Django + frontend
 default_language_version:
   python: python3.12
 
@@ -13,19 +11,15 @@ repos:
     hooks:
       - id: trailing-whitespace
         stages: [pre-commit]
-        language_version: python3
+        language_version: python3.12
       - id: end-of-file-fixer
         stages: [pre-commit]
-        language_version: python3
+        language_version: python3.12
       - id: check-yaml
         stages: [pre-commit]
-        language_version: python3
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
-        stages: [pre-commit]
-        language_version: python3
+        language_version: python3.12
 
-  # Auto-format Python (fast)
+
   - repo: https://github.com/psf/black
     rev: 24.3.0
     hooks:

@@ -4,6 +4,8 @@ import shutil
 import subprocess
 import sys
 
+sys.stdout.reconfigure(encoding="utf-8")
+
 
 def run_command(cmd, cwd=None):
     """Run a command and exit on failure."""
