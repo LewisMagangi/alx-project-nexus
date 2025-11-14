@@ -1,3 +1,4 @@
+
 name: CI/CD Pipeline
 
 on:
@@ -110,4 +111,4 @@ jobs:
       #     pa_autoconfigure_django.py \
       #       --python=3.12 \
       #       --nuke \
-      #       https://github.com/${{ github.repository }}.git
+      #       https://github.com/${{ github.repository }}.git \
