@@ -10,16 +10,16 @@ from pathlib import Path
 import django
 import pytest
 
-# Add backend directory to Python path (for CI)
-backend_dir = Path(__file__).parent.parent  # Go up from tests/ to backend/
-if str(backend_dir) not in sys.path:
-    sys.path.insert(0, str(backend_dir))
+# Ensure repo root is in Python path
+# backend/tests -> backend -> repo root
+repo_root = Path(__file__).parent.parent
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
 
 # Set Django settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 # Setup Django
-
 django.setup()
 
 
