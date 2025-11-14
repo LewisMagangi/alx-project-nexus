@@ -40,7 +40,7 @@ for path in venv_paths:
         break
 
 # Run Django tests
-print("\n" + "=" * 70)
+print(f"\n{'=' * 70}")
 print("🧪 Running Backend Tests (pytest)")
 print("=" * 70)
 run_command(

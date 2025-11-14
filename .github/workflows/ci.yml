@@ -24,21 +24,17 @@ jobs:
           cache-dependency-path: backend/requirements.txt
 
       - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
+        working-directory: backend
+        run: pip install -r requirements.txt
 
       - name: Run flake8
-        run: |
-          cd backend
-          flake8 . --max-line-length=79 --exclude=venv,migrations
+        working-directory: backend
+        run: flake8 . --max-line-length=79 --exclude=venv,migrations
 
       - name: Run pytest
-        run: |
-          cd backend
-          pytest --maxfail=1 --disable-warnings -v
+        working-directory: backend
+        run: pytest --maxfail=1 --disable-warnings -v
         env:
-          DJANGO_SETTINGS_MODULE: backend.settings
           SECRET_KEY: test-secret-key-for-ci
 
   # ============================================
