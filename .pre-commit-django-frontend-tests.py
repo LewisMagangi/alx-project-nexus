@@ -10,7 +10,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 def run_command(cmd, cwd=None):
     """Run a command and exit on failure."""
     print(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd)
+    result = subprocess.run(cmd, cwd=cwd, env=os.environ)
     if result.returncode != 0:
         sys.exit(result.returncode)
 
@@ -23,29 +23,33 @@ venv_paths = [
 
 for path in venv_paths:
     if os.path.exists(path):
+        venv_dir = os.path.abspath("./backend/venv")
         if os.name == "nt":
-            os.environ["VIRTUAL_ENV"] = os.path.abspath("./backend/venv")
+            os.environ["VIRTUAL_ENV"] = venv_dir
             os.environ["PATH"] = (
-                os.path.join(os.environ["VIRTUAL_ENV"], "Scripts")
+                os.path.join(venv_dir, "Scripts")
                 + os.pathsep
                 + os.environ["PATH"]
             )
+            python_cmd = os.path.join(venv_dir, "Scripts", "python.exe")
         else:
-            os.environ["VIRTUAL_ENV"] = os.path.abspath("./backend/venv")
+            os.environ["VIRTUAL_ENV"] = venv_dir
             os.environ["PATH"] = (
-                os.path.join(os.environ["VIRTUAL_ENV"], "bin")
-                + os.pathsep
-                + os.environ["PATH"]
+                os.path.join(venv_dir, "bin") + os.pathsep + os.environ["PATH"]
             )
+            python_cmd = os.path.join(venv_dir, "bin", "python")
         break
+else:
+    python_cmd = sys.executable
 
 # Run Django tests
 print(f"\n{'=' * 70}")
 print("🧪 Running Backend Tests (pytest)")
 print("=" * 70)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 run_command(
     [
-        sys.executable,
+        python_cmd,
         "-m",
         "pytest",
         "--maxfail=1",
