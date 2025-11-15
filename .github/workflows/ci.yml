@@ -35,8 +35,8 @@ jobs:
         run: pytest --maxfail=1 --disable-warnings -v
         working-directory: backend
         env:
+          DJANGO_SETTINGS_MODULE: backend.settings
           SECRET_KEY: test-secret-key-for-ci
-          DJANGO_SETTINGS_MODULE: settings
 
   # ============================================
   # Frontend: Next.js + React + Tailwind
