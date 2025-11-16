@@ -1,6 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
-from rest_framework import serializers, viewsets
-from users.models import User
+from rest_framework import serializers
 
 
 class Post(models.Model):
@@ -48,15 +48,53 @@ class Follow(models.Model):
 
 # Serializers
 class PostSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
-        fields = ["id", "user", "content", "created_at"]
+        fields = [
+            "id",
+            "user",
+            "username",
+            "content",
+            "created_at",
+            "likes_count",
+            "is_liked",
+        ]
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
 
 class LikeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Like
         fields = ["id", "user", "post", "created_at"]
+
+    def validate(self, data):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        post = data.get("post")
+        if (
+            user
+            and post
+            and Like.objects.filter(user=user, post=post).exists()
+        ):
+            raise serializers.ValidationError(
+                {"non_field_errors": ["You have already liked this post."]}
+            )
+        return data
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -66,16 +104,3 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 # ViewSets
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-
-class LikeViewSet(viewsets.ModelViewSet):
-    queryset = Like.objects.all()
-    serializer_class = LikeSerializer
-
-
-class FollowViewSet(viewsets.ModelViewSet):
-    queryset = Follow.objects.all()
-    serializer_class = FollowSerializer

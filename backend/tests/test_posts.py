@@ -1,14 +1,15 @@
 import pytest
+from django.contrib.auth.models import User
 from django.urls import reverse
 from posts.models import Post
 from rest_framework.test import APIClient
-from users.models import User
 
 
 @pytest.mark.django_db
 def test_create_post():
     user = User.objects.create(username="testuser", password="testpass")
     client = APIClient()
+    client.force_authenticate(user=user)
     url = reverse("post-list")
     data = {"user": user.id, "content": "Hello, world!"}
     response = client.post(url, data, format="json")
@@ -21,6 +22,7 @@ def test_list_posts():
     user = User.objects.create(username="testuser", password="testpass")
     Post.objects.create(user=user, content="First post")
     client = APIClient()
+    client.force_authenticate(user=user)
     url = reverse("post-list")
     response = client.get(url)
     assert response.status_code == 200

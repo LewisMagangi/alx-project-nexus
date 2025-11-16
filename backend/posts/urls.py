@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from .models import FollowViewSet, LikeViewSet, PostViewSet
+from .views import FollowViewSet, LikeViewSet, PostViewSet
 
 router = routers.DefaultRouter()
 router.register(r"posts", PostViewSet)
