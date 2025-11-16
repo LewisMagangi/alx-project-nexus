@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 def test_create_post():
     user = User.objects.create(username="testuser", password="testpass")
     client = APIClient()
+    client.force_authenticate(user=user)
     url = reverse("post-list")
     data = {"user": user.id, "content": "Hello, world!"}
     response = client.post(url, data, format="json")
