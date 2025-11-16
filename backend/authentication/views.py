@@ -12,7 +12,7 @@ class LoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
-        if user is not None:
+        if user:
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -31,6 +31,7 @@ class RegisterView(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
+        # Get email from request data
         email = request.data.get("email")
         if not username or not password:
             return Response(
@@ -46,6 +47,9 @@ class RegisterView(APIView):
             username=username, password=password, email=email
         )
         return Response(
-            {"message": "User registered successfully."},
+            {
+                "user": UserSerializer(user).data,
+                "message": "User registered successfully.",
+            },
             status=status.HTTP_201_CREATED,
         )
