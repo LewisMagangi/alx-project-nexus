@@ -22,6 +22,7 @@ def test_list_posts():
     user = User.objects.create(username="testuser", password="testpass")
     Post.objects.create(user=user, content="First post")
     client = APIClient()
+    client.force_authenticate(user=user)
     url = reverse("post-list")
     response = client.get(url)
     assert response.status_code == 200
