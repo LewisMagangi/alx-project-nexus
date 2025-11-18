@@ -26,6 +26,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
+  const [likingPosts, setLikingPosts] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchPosts();
@@ -59,12 +60,16 @@ function DashboardContent() {
   };
 
   const handleLike = async (postId: number, isLiked: boolean) => {
+    if (likingPosts.has(postId)) return;
+
+    setLikingPosts(prev => new Set(prev).add(postId));
+
     try {
       if (isLiked) {
         // Find like ID and delete
         const likesResponse = await likesAPI.getAll();
         const like = likesResponse.data.find(
-          (l: any) => l.post_id === postId && l.user_id === user?.id
+          (l: any) => l.post === postId && l.user === user?.id
         );
         if (like) {
           await likesAPI.delete(like.id);
@@ -77,6 +82,13 @@ function DashboardContent() {
       // Log backend error details for debugging
       console.error('Failed to toggle like', err);
       console.error('Backend error:', err.response?.data);
+      setError(err.response?.data?.message || 'Failed to toggle like');
+    } finally {
+      setLikingPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
     }
   };
 
@@ -147,6 +159,7 @@ function DashboardContent() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(post.id, post.is_liked)}
+                    disabled={likingPosts.has(post.id)}
                     className="flex items-center gap-1"
                   >
                     <Heart
