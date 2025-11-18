@@ -81,6 +81,7 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = ["id", "user", "post", "created_at"]
+        read_only_fields = ["user"]
 
     def validate(self, data):
         request = self.context.get("request")
