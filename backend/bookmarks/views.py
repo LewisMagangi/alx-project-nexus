@@ -34,7 +34,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
         return Bookmark.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        """Create bookmark with current user and return the created bookmark data"""
+        """Create bookmark with current user and return the bookmark data"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         bookmark = Bookmark.objects.create(
