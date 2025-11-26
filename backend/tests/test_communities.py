@@ -1,5 +1,5 @@
 import pytest
-from communities.models import Community, CommunityMember, CommunityPost
+from communities.models import Community, CommunityMember
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
