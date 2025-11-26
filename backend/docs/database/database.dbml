@@ -101,3 +101,45 @@ Table usermessages {
   is_read boolean [default: false]
   created_at timestamp [default: `now()`]
 }
+
+///////////////////////////////////////////////////////
+// COMMUNITIES
+///////////////////////////////////////////////////////
+// 3NF: community stores only intrinsic properties.
+
+Table communities {
+  id int [pk, increment]
+  name varchar(255) [not null]
+  description text
+  owner_id int [not null, ref: > users.id]
+  created_at timestamp [default: `now()`]
+}
+
+///////////////////////////////////////////////////////
+// COMMUNITY MEMBERS
+///////////////////////////////////////////////////////
+// 3NF: joining table for many-to-many membership.
+
+Table community_members {
+  id int [pk, increment]
+  community_id int [not null, ref: > communities.id]
+  user_id int [not null, ref: > users.id]
+  joined_at timestamp [default: `now()`]
+
+  indexes {
+    (community_id, user_id) [unique]
+  }
+}
+
+///////////////////////////////////////////////////////
+// COMMUNITY POSTS
+///////////////////////////////////////////////////////
+// 3NF: Post is uniquely identified and stores only base facts.
+
+Table community_posts {
+  id int [pk, increment]
+  community_id int [not null, ref: > communities.id]
+  user_id int [not null, ref: > users.id]
+  content text [not null]
+  created_at timestamp [default: `now()`]
+}
