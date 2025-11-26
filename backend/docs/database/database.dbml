@@ -86,3 +86,18 @@ Table notifications {
   is_read boolean [default: false]
   created_at timestamp [default: `now()`]
 }
+
+///////////////////////////////////////////////////////
+// MESSAGES (DM)
+///////////////////////////////////////////////////////
+// 3NF: no derived attributes.
+// No duplicated usernames.
+
+Table usermessages {
+  id int [pk, increment]
+  sender_id int [not null, ref: > users.id]
+  receiver_id int [not null, ref: > users.id]
+  content text [not null]
+  is_read boolean [default: false]
+  created_at timestamp [default: `now()`]
+}
