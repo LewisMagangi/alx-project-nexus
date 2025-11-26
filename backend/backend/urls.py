@@ -24,4 +24,5 @@ urlpatterns = [
     path("api/", include("backend.openapi_urls")),
     path("api/auth/", include("authentication.urls")),
     path("api/", include("bookmarks.urls")),
+    path("api/", include("notifications.urls")),
 ]

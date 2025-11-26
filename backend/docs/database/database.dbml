@@ -1,7 +1,11 @@
 Project twitter_mvp {
   database_type: "PostgreSQL"
-  note: "Minimal Twitter MVP - Strict 3NF"
+  note: "Minimal Twitter MVP Expanded - STRICT 3NF"
 }
+
+///////////////////////////////////////////////////////
+// USERS
+///////////////////////////////////////////////////////
 
 Table users {
   id int [pk, increment]
@@ -10,12 +14,20 @@ Table users {
   created_at timestamp [default: `now()`]
 }
 
+///////////////////////////////////////////////////////
+// POSTS
+///////////////////////////////////////////////////////
+
 Table posts {
   id int [pk, increment]
   user_id int [not null, ref: > users.id]
   content varchar(280) [not null]
   created_at timestamp [default: `now()`]
 }
+
+///////////////////////////////////////////////////////
+// LIKES
+///////////////////////////////////////////////////////
 
 Table likes {
   id int [pk, increment]
@@ -28,6 +40,10 @@ Table likes {
   }
 }
 
+///////////////////////////////////////////////////////
+// FOLLOWS
+///////////////////////////////////////////////////////
+
 Table follows {
   id int [pk, increment]
   follower_id int [not null, ref: > users.id]
@@ -39,6 +55,10 @@ Table follows {
   }
 }
 
+///////////////////////////////////////////////////////
+// BOOKMARKS (PHASE 1 COMPLETED)
+///////////////////////////////////////////////////////
+
 Table bookmarks {
   id int [pk, increment]
   user_id int [not null, ref: > users.id]
@@ -48,6 +68,21 @@ Table bookmarks {
   indexes {
     (user_id, post_id) [unique]
   }
+}
 
-  note: 'User saved posts for later reading'
+///////////////////////////////////////////////////////
+// NOTIFICATIONS
+///////////////////////////////////////////////////////
+// 3NF: A notification only stores scalar facts.
+// No redundant actor or target info.
+
+Table notifications {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]       // Receiver
+  actor_id int [ref: > users.id]                // Optional actor
+  verb varchar(255) [not null]                  // "liked_post", "followed_you"
+  target_id int                                 // e.g. post_id
+  target_type varchar(50)                       // "post", "user", "community"
+  is_read boolean [default: false]
+  created_at timestamp [default: `now()`]
 }
