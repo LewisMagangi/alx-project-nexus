@@ -31,8 +31,8 @@ class RegisterView(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
-        # Get email from request data
         email = request.data.get("email")
+        accepted_legal_policies = request.data.get("accepted_legal_policies")
         if not username or not password:
             return Response(
                 {"error": "Username and password required."},
@@ -43,9 +43,22 @@ class RegisterView(APIView):
                 {"error": "Username already exists."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Accept True, 'true', or 'True' as valid acceptance
+        if not (
+            accepted_legal_policies is True
+            or str(accepted_legal_policies).lower() == "true"
+        ):
+            return Response(
+                {"error": "You must accept the legal policies to register."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user = User.objects.create_user(
             username=username, password=password, email=email
         )
+        # Create UserProfile with accepted_legal_policies True
+        from users.models import UserProfile
+
+        UserProfile.objects.create(user=user, accepted_legal_policies=True)
         return Response(
             {
                 "user": UserSerializer(user).data,
