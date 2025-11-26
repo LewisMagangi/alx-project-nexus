@@ -25,4 +25,5 @@ urlpatterns = [
     path("api/auth/", include("authentication.urls")),
     path("api/", include("bookmarks.urls")),
     path("api/", include("notifications.urls")),
+    path("api/search/", include("search.urls")),
 ]
