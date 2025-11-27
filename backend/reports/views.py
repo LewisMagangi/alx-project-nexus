@@ -1,6 +1,5 @@
 from rest_framework import generics, permissions
 
-from .models import PostReport
 from .serializers import PostReportSerializer
 
 

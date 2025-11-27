@@ -1,12 +1,10 @@
 from django.db import models
+from posts.models import Post
 
 
 # Create your models here.
 class Hashtag(models.Model):
     tag = models.CharField(max_length=100, unique=True)
-
-
-from posts.models import Post
 
 
 class PostHashtag(models.Model):
