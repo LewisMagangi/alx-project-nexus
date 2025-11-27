@@ -18,7 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from .views import simple_home
+
 urlpatterns = [
+    path("", simple_home, name="simple-home"),
     path("admin/", admin.site.urls),
     path("api/", include("posts.urls")),
     path("api/", include("backend.openapi_urls")),

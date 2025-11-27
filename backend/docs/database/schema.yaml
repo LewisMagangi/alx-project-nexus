@@ -103,7 +103,6 @@ paths:
       - auth
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           description: No response body
@@ -123,6 +122,19 @@ paths:
       operationId: bookmarks_list
       description: Retrieve all posts bookmarked by the authenticated user
       summary: List user's bookmarks
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - Bookmarks
       security:
@@ -132,9 +144,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Bookmark'
+                $ref: '#/components/schemas/PaginatedBookmarkList'
           description: ''
     post:
       operationId: bookmarks_create
@@ -203,6 +213,19 @@ paths:
   /api/communities/:
     get:
       operationId: communities_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - communities
       security:
@@ -212,9 +235,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Community'
+                $ref: '#/components/schemas/PaginatedCommunityList'
           description: ''
     post:
       operationId: communities_create
@@ -259,20 +280,36 @@ paths:
           description: No response body
   /api/communities/{community_id}/posts/:
     get:
-      operationId: communities_posts_retrieve
+      operationId: communities_posts_list
       parameters:
       - in: path
         name: community_id
         schema:
           type: integer
         required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - communities
       security:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommunityPostList'
+          description: ''
     post:
       operationId: communities_posts_create
       parameters:
@@ -283,14 +320,43 @@ paths:
         required: true
       tags:
       - communities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityPost'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommunityPost'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommunityPost'
+        required: true
       security:
       - jwtAuth: []
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPost'
+          description: ''
   /api/follows/:
     get:
       operationId: follows_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - follows
       security:
@@ -300,9 +366,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Follow'
+                $ref: '#/components/schemas/PaginatedFollowList'
           description: ''
     post:
       operationId: follows_create
@@ -432,6 +496,19 @@ paths:
   /api/likes/:
     get:
       operationId: likes_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - likes
       security:
@@ -441,9 +518,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Like'
+                $ref: '#/components/schemas/PaginatedLikeList'
           description: ''
     post:
       operationId: likes_create
@@ -604,6 +679,19 @@ paths:
   /api/notifications/:
     get:
       operationId: notifications_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - notifications
       security:
@@ -613,9 +701,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Notification'
+                $ref: '#/components/schemas/PaginatedNotificationList'
           description: ''
   /api/notifications/mark-read/{id}/:
     post:
@@ -636,6 +722,25 @@ paths:
   /api/posts/:
     get:
       operationId: posts_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - posts
       security:
@@ -645,9 +750,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PaginatedPostList'
           description: ''
     post:
       operationId: posts_create
@@ -774,6 +877,40 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/posts/home/:
+    get:
+      operationId: posts_home_retrieve
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
+  /api/posts/user/{user_id}/:
+    get:
+      operationId: posts_user_retrieve
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+          description: ''
   /api/schema/:
     get:
       operationId: schema_retrieve
@@ -933,13 +1070,15 @@ components:
   schemas:
     Bookmark:
       type: object
+      description: |-
+        Serializer for creating and listing bookmarks.
+        Uses PostSerializer for read operations and post_id for write operations.
       properties:
         id:
           type: integer
           readOnly: true
         post:
-          allOf:
-          - $ref: '#/components/schemas/Post'
+          type: string
           readOnly: true
         post_id:
           type: integer
@@ -967,10 +1106,39 @@ components:
         owner:
           type: integer
           readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
       required:
+      - created_at
       - id
       - name
       - owner
+    CommunityPost:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        community:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - community
+      - content
+      - created_at
+      - id
+      - user
     Follow:
       type: object
       properties:
@@ -1045,6 +1213,167 @@ components:
       - created_at
       - id
       - verb
+    PaginatedBookmarkList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookmark'
+    PaginatedCommunityList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Community'
+    PaginatedCommunityPostList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityPost'
+    PaginatedFollowList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Follow'
+    PaginatedLikeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Like'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedPostList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
     PatchedFollow:
       type: object
       properties:
@@ -1085,19 +1414,24 @@ components:
           readOnly: true
         username:
           type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
           readOnly: true
         content:
           type: string
           maxLength: 280
+        parent_post:
+          type: integer
+          nullable: true
+        replies_count:
+          type: string
+          readOnly: true
         created_at:
           type: string
           format: date-time
           readOnly: true
-        likes_count:
-          type: string
-          readOnly: true
-        is_liked:
-          type: string
+        is_deleted:
+          type: boolean
           readOnly: true
     Post:
       type: object
@@ -1110,26 +1444,31 @@ components:
           readOnly: true
         username:
           type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
           readOnly: true
         content:
           type: string
           maxLength: 280
+        parent_post:
+          type: integer
+          nullable: true
+        replies_count:
+          type: string
+          readOnly: true
         created_at:
           type: string
           format: date-time
           readOnly: true
-        likes_count:
-          type: string
-          readOnly: true
-        is_liked:
-          type: string
+        is_deleted:
+          type: boolean
           readOnly: true
       required:
       - content
       - created_at
       - id
-      - is_liked
-      - likes_count
+      - is_deleted
+      - replies_count
       - user
       - username
     TokenObtainPair:

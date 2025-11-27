@@ -1,47 +1,39 @@
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Community, CommunityMember, CommunityPost
 from .serializers import CommunityPostSerializer, CommunitySerializer
 
 
-# Create your views here.
 class CommunityListCreateView(generics.ListCreateAPIView):
     queryset = Community.objects.all()
     serializer_class = CommunitySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
 
-class CommunityJoinView(APIView):
-    permission_classes = [IsAuthenticated]
+class CommunityJoinView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, community_id):
         CommunityMember.objects.get_or_create(
             user=request.user, community_id=community_id
         )
-        return Response({"message": "Joined"})
+        return Response({"message": "Joined"}, status=status.HTTP_200_OK)
 
 
-class CommunityPostsView(APIView):
-    permission_classes = [IsAuthenticated]
+class CommunityPostsView(generics.ListCreateAPIView):
+    serializer_class = CommunityPostSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, community_id):
-        posts = CommunityPost.objects.filter(community_id=community_id)
-        return Response(CommunityPostSerializer(posts, many=True).data)
-
-    def post(self, request, community_id):
-        serializer = CommunityPostSerializer(
-            data={
-                "community": community_id,
-                "content": request.data.get("content"),
-            }
+    def get_queryset(self):
+        return CommunityPost.objects.filter(
+            community_id=self.kwargs["community_id"]
         )
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user, community_id=self.kwargs["community_id"]
+        )

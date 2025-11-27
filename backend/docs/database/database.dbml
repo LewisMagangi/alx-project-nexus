@@ -1,6 +1,6 @@
 Project twitter_mvp {
   database_type: "PostgreSQL"
-  note: "Minimal Twitter MVP Expanded - STRICT 3NF"
+  note: "Full Twitter Text-Only MVP — Strict 3NF Schema"
 }
 
 ///////////////////////////////////////////////////////
@@ -11,7 +11,29 @@ Table users {
   id int [pk, increment]
   username varchar(50) [unique, not null]
   password varchar(255) [not null]
+
+  bio text
+  location varchar(100)
+  website varchar(255)
+
   created_at timestamp [default: `now()`]
+  is_suspended boolean [default: false]
+  is_deleted boolean [default: false]
+}
+
+///////////////////////////////////////////////////////
+// USER BLOCKS (Anti-abuse)
+///////////////////////////////////////////////////////
+
+Table blocks {
+  id int [pk, increment]
+  blocker_id int [not null, ref: > users.id]
+  blocked_id int [not null, ref: > users.id]
+  created_at timestamp [default: `now()`]
+
+  indexes {
+    (blocker_id, blocked_id) [unique]
+  }
 }
 
 ///////////////////////////////////////////////////////
@@ -21,8 +43,11 @@ Table users {
 Table posts {
   id int [pk, increment]
   user_id int [not null, ref: > users.id]
+
   content varchar(280) [not null]
+
   parent_post_id int [ref: > posts.id]  // Replies / threads
+
   created_at timestamp [default: `now()`]
   is_deleted boolean [default: false]
 
@@ -30,6 +55,23 @@ Table posts {
     user_id
     created_at
     parent_post_id
+  }
+}
+
+///////////////////////////////////////////////////////
+// POST REPORTS (Moderation)
+///////////////////////////////////////////////////////
+
+Table post_reports {
+  id int [pk, increment]
+  post_id int [not null, ref: > posts.id]
+  reporter_id int [not null, ref: > users.id]
+  reason varchar(255)
+  created_at timestamp [default: `now()`]
+
+  indexes {
+    (post_id)
+    (reporter_id)
   }
 }
 
@@ -45,6 +87,7 @@ Table likes {
 
   indexes {
     (user_id, post_id) [unique]
+    post_id
   }
 }
 
@@ -60,11 +103,13 @@ Table follows {
 
   indexes {
     (follower_id, following_id) [unique]
+    follower_id
+    following_id
   }
 }
 
 ///////////////////////////////////////////////////////
-// BOOKMARKS (PHASE 1 COMPLETED)
+// BOOKMARKS
 ///////////////////////////////////////////////////////
 
 Table bookmarks {
@@ -81,39 +126,49 @@ Table bookmarks {
 ///////////////////////////////////////////////////////
 // NOTIFICATIONS
 ///////////////////////////////////////////////////////
-// 3NF: A notification only stores scalar facts.
-// No redundant actor or target info.
 
 Table notifications {
   id int [pk, increment]
+
   user_id int [not null, ref: > users.id]       // Receiver
   actor_id int [ref: > users.id]                // Optional actor
-  verb varchar(255) [not null]                  // "liked_post", "followed_you"
+
+  verb varchar(255) [not null]                  // "liked_post", etc.
   target_id int                                 // e.g. post_id
-  target_type varchar(50)                       // "post", "user", "community"
+  target_type varchar(50)                       // "post", "user"
+
   is_read boolean [default: false]
   created_at timestamp [default: `now()`]
+
+  indexes {
+    user_id
+    is_read
+  }
 }
 
 ///////////////////////////////////////////////////////
-// MESSAGES (DM)
+// DIRECT MESSAGES (DM)
 ///////////////////////////////////////////////////////
-// 3NF: no derived attributes.
-// No duplicated usernames.
 
-Table usermessages {
+Table user_messages {
   id int [pk, increment]
   sender_id int [not null, ref: > users.id]
   receiver_id int [not null, ref: > users.id]
+
   content text [not null]
   is_read boolean [default: false]
+
   created_at timestamp [default: `now()`]
+
+  indexes {
+    sender_id
+    receiver_id
+  }
 }
 
 ///////////////////////////////////////////////////////
 // COMMUNITIES
 ///////////////////////////////////////////////////////
-// 3NF: community stores only intrinsic properties.
 
 Table communities {
   id int [pk, increment]
@@ -126,7 +181,6 @@ Table communities {
 ///////////////////////////////////////////////////////
 // COMMUNITY MEMBERS
 ///////////////////////////////////////////////////////
-// 3NF: joining table for many-to-many membership.
 
 Table community_members {
   id int [pk, increment]
@@ -142,7 +196,6 @@ Table community_members {
 ///////////////////////////////////////////////////////
 // COMMUNITY POSTS
 ///////////////////////////////////////////////////////
-// 3NF: Post is uniquely identified and stores only base facts.
 
 Table community_posts {
   id int [pk, increment]
@@ -150,4 +203,44 @@ Table community_posts {
   user_id int [not null, ref: > users.id]
   content text [not null]
   created_at timestamp [default: `now()`]
+}
+
+///////////////////////////////////////////////////////
+// HASHTAGS
+///////////////////////////////////////////////////////
+// Strict 3NF: Hashtag is independent entity.
+
+Table hashtags {
+  id int [pk, increment]
+  tag varchar(100) [unique, not null]
+}
+
+///////////////////////////////////////////////////////
+// POST-HASHTAG JOIN TABLE
+///////////////////////////////////////////////////////
+
+Table post_hashtags {
+  id int [pk, increment]
+  post_id int [not null, ref: > posts.id]
+  hashtag_id int [not null, ref: > hashtags.id]
+
+  indexes {
+    (post_id, hashtag_id) [unique]
+  }
+}
+
+///////////////////////////////////////////////////////
+// LOGIN LOGS (Security)
+///////////////////////////////////////////////////////
+
+Table login_logs {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  ip_address varchar(50)
+  user_agent text
+  created_at timestamp [default: `now()`]
+
+  indexes {
+    user_id
+  }
 }
