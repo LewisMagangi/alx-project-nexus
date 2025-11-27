@@ -4,6 +4,9 @@ from django.db import models
 
 # Create your models here.
 class Notification(models.Model):
+    class Meta:
+        ordering = ["-created_at"]
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="notifications"
     )
