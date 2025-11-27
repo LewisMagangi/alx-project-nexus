@@ -6,17 +6,20 @@ from .models import Community, CommunityPost
 class CommunitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Community
-        fields = [
-            "id",
-            "name",
-            "description",
-            "owner",
-        ]  # include all fields you want to return
-        read_only_fields = ["owner"]  # add owner here
+        fields = ["id", "name", "description", "owner", "created_at"]
+        read_only_fields = ["owner", "created_at"]
+
+    def create(self, validated_data):
+        validated_data["owner"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class CommunityPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunityPost
         fields = ["id", "community", "user", "content", "created_at"]
-        read_only_fields = ["user", "created_at"]
+        read_only_fields = ["community", "user", "created_at"]
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)

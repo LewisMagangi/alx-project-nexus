@@ -1,3 +1,15 @@
-# from django.contrib import admin
+from django.contrib import admin
 
-# Register your models here.
+from .models import Message
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "sender",
+        "receiver",
+        "content",
+        "created_at",
+        "is_read",
+    )

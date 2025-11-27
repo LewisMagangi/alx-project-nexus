@@ -46,16 +46,22 @@ def test_join_community(client, user):
     ).exists()
 
 
-def test_community_posts(client, user):
+def test_community_posts(authenticated_client, user):
     community = Community.objects.create(
         name="Postable", description="Postable community", owner=user
     )
     url = f"/api/communities/{community.id}/posts/"
     # Create post
-    response = client.post(url, {"content": "Hello Community!"})
-    assert response.status_code == 200
+    response = authenticated_client.post(url, {"content": "Hello Community!"})
+    assert response.status_code == 201
     assert response.data["content"] == "Hello Community!"
     # List posts
-    response = client.get(url)
+    response = authenticated_client.get(url)
     assert response.status_code == 200
-    assert any(p["content"] == "Hello Community!" for p in response.data)
+    data = response.data
+    # Handle paginated or non-paginated response
+    if isinstance(data, dict) and "results" in data:
+        posts = data["results"]
+    else:
+        posts = data
+    assert any(p["content"] == "Hello Community!" for p in posts)
