@@ -55,8 +55,13 @@ class TestBookmarks:
         response = self.client.get(url)
 
         assert response.status_code == 200
-        assert len(response.data) == 1
-        assert response.data[0]["post"]["id"] == self.post.id
+        bookmarks = (
+            response.data["results"]
+            if "results" in response.data
+            else response.data
+        )
+        assert len(bookmarks) == 1
+        assert bookmarks[0]["post"]["id"] == self.post.id
 
     def test_delete_bookmark(self):
         """Test removing a bookmark"""
@@ -82,7 +87,12 @@ class TestBookmarks:
         response = self.client.get(url)
 
         assert response.status_code == 200
-        assert len(response.data) == 0
+        bookmarks = (
+            response.data["results"]
+            if "results" in response.data
+            else response.data
+        )
+        assert len(bookmarks) == 0
 
     def test_unauthenticated_fails(self):
         """Test that unauthenticated requests fail"""

@@ -14,9 +14,10 @@ def user():
 @pytest.fixture
 def client(user):
     client = APIClient()
-    # Obtain JWT token
+    # Obtain JWT token using the correct endpoint
     response = client.post(
-        "/api/auth/login/", {"username": "testuser", "password": "testpass"}
+        "/api/auth/jwt/create/",
+        {"username": "testuser", "password": "testpass"},
     )
     assert response.status_code == 200
     token = response.data["access"]
