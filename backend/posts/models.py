@@ -7,8 +7,23 @@ class Post(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts"
     )
+
     content = models.CharField(max_length=280)
+    parent_post = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "created_at"]),
+            models.Index(fields=["parent_post"]),
+        ]
 
     def __str__(self):
         return f"{self.user.username}: {self.content[:30]}"
