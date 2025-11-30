@@ -5,7 +5,20 @@ import { AuthProvider } from '@/context/AuthContext';
 
 // --- Mock next/navigation properly at top-level ---
 jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    pathname: '/',
+    query: {},
+    asPath: '/',
+    back: jest.fn(),
+    forward: jest.fn(),
+    reload: jest.fn(),
+  }),
+  usePathname: jest.fn(() => '/'),
+  useSearchParams: jest.fn(() => ({ get: jest.fn() })),
+  __esModule: true,
 }));
 
 import { usePathname } from 'next/navigation';
@@ -42,7 +55,7 @@ describe('Navbar Component', () => {
 
     renderWithAuth();
 
-    expect(screen.queryByText('Twitter MVP')).toBeNull();
+    expect(screen.queryByText('Nexus')).toBeNull();
   });
 
   it('should not render if user is not logged in', () => {
@@ -54,7 +67,7 @@ describe('Navbar Component', () => {
       </AuthProvider>
     );
 
-    expect(screen.queryByText('Twitter MVP')).toBeNull();
+    expect(screen.queryByText('Nexus')).toBeNull();
   });
 
   it('should render navigation items when user is logged in', () => {
@@ -62,21 +75,20 @@ describe('Navbar Component', () => {
 
     renderWithAuth();
 
-    expect(screen.getByText('Twitter MVP')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Posts')).toBeInTheDocument();
-    expect(screen.getByText('Follows')).toBeInTheDocument();
-    expect(screen.getByText('Profile')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByText('@testuser')).toBeInTheDocument();
+    expect(screen.getByText('Nexus')).toBeInTheDocument();
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Explore').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Notifications').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Messages').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Bookmarks').length).toBeGreaterThan(0);
   });
 
   it('should highlight the active navigation item', () => {
-    mockUsePathname.mockReturnValue('/posts');
+    mockUsePathname.mockReturnValue('/profile');
 
     renderWithAuth();
 
-    const postsLink = screen.getByText('Posts').closest('a');
-    expect(postsLink).toHaveClass('border-blue-500');
+    const profileLink = screen.getByText('Profile').closest('a');
+    expect(profileLink).toHaveClass('bg-blue-50');
   });
 });
