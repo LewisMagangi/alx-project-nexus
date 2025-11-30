@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User Messages API</title>
+        <link rel="stylesheet" type="text/css" href="/static/home.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>User Messages API</h1>
+            <p>To view your messages, please enter the user ID of the conversation partner and authenticate.</p>
+            <form method="get" action="/api/messages/" style="margin-bottom: 20px;">
+                <label for="user_id">User ID:</label>
+                <input type="number" id="user_id" name="user_id" required style="margin: 0 10px;" />
+                <button type="submit">Go to Conversation</button>
+            </form>
+            <p><em>You must be logged in to view messages.</em></p>
+            <a href="/" style="display:inline-block;margin-top:20px;">&larr; Back to Home</a>
+            <div class="footer">&copy; 2025 Project Nexus</div>
+        </div>
+    </body>
+</html>
