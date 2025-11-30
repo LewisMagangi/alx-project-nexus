@@ -5,8 +5,10 @@ from rest_framework_simplejwt.views import (
 )
 
 from .views import LoginView, RegisterView
+from .views_auth_home import auth_home
 
 urlpatterns = [
+    path("", auth_home, name="auth-home"),
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
     path(

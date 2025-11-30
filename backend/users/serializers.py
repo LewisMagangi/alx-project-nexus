@@ -10,6 +10,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ["accepted_legal_policies"]
 
 
+class PublicUserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "profile"]
+
+
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
 

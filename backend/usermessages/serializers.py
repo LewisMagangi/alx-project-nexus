@@ -5,6 +5,7 @@ from .models import Message
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_username = serializers.ReadOnlyField(source="sender.username")
+    receiver = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Message
@@ -17,3 +18,4 @@ class MessageSerializer(serializers.ModelSerializer):
             "is_read",
         ]
         read_only_fields = ["sender_username", "created_at", "is_read"]
+        extra_kwargs = {"receiver": {"write_only": True, "required": False}}
