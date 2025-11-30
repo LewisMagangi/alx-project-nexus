@@ -6,11 +6,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.serializers import UserSerializer
 
-from .serializers import (
-    AuthResponseSerializer,
-    LoginSerializer,
-    RegisterSerializer,
-)
+from .serializers import LoginSerializer, RegisterSerializer
 
 
 class RegisterView(generics.CreateAPIView):

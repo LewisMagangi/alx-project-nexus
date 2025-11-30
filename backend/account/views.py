@@ -54,7 +54,7 @@ class AccountDeleteView(generics.DestroyAPIView):
         instance.save()
 
     def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
+        super().delete(request, *args, **kwargs)
         return Response(
             {"detail": "Account deactivated"}, status=status.HTTP_200_OK
         )

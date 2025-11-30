@@ -258,7 +258,7 @@ class Command(BaseCommand):
         self.stdout.write("\n" + "=" * 50)
         self.stdout.write(self.style.SUCCESS("Database seeded successfully!"))
         self.stdout.write("=" * 50)
-        self.stdout.write(f"\nSummary:")
+        self.stdout.write("\nSummary:")
         self.stdout.write(f"  Users: {len(users)}")
         self.stdout.write(f"  Posts: {len(posts)}")
         self.stdout.write(f"  Follows: {follow_count}")
