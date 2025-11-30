@@ -1,208 +1,499 @@
+// frontend/app/settings/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
-import { followsAPI, usersAPI } from '@/services/api';
+import { accountAPI } from '@/services/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import {
+  User,
+  Lock,
+  Bell,
+  Trash2,
+  LogOut,
+  AlertTriangle,
+  CheckCircle
+} from 'lucide-react';
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-}
+function SettingsContent() {
+  const { user, setUser, logout } = useAuth();
+  const router = useRouter();
 
-interface Follow {
-  id: number;
-  follower_id: number;
-  following_id: number;
-  follower_username?: string;
-  following_username?: string;
-}
+  // Account settings state
+  const [username, setUsername] = useState(user?.username || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
-function FollowsContent() {
-  const { user } = useAuth();
-  const [followers, setFollowers] = useState<Follow[]>([]);
-  const [following, setFollowing] = useState<Follow[]>([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Password change state
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // UI state
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  // Notification preferences (mock for now)
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [pushNotifs, setPushNotifs] = useState(true);
+  const [followNotifs, setFollowNotifs] = useState(true);
+  const [likeNotifs, setLikeNotifs] = useState(true);
+  const [replyNotifs, setReplyNotifs] = useState(true);
 
-  const fetchData = async () => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
-      const [followsRes, usersRes] = await Promise.all([
-        followsAPI.getAll(),
-        usersAPI.getAll(),
-      ]);
-
-      const allFollows = followsRes.data;
-      setFollowers(allFollows.filter((f: Follow) => f.following_id === user?.id));
-      setFollowing(allFollows.filter((f: Follow) => f.follower_id === user?.id));
-      setAllUsers(usersRes.data.filter((u: User) => u.id !== user?.id));
-    } catch (err) {
-      setError('Failed to load data');
+      const response = await accountAPI.update({ username, email });
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      setSuccess('Profile updated successfully!');
+      setIsEditingProfile(false);
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : (typeof err === 'object' && err !== null && 'response' in err)
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined;
+      setError(message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFollow = async (userId: number) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await followsAPI.create(userId);
-      await fetchData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to follow user');
+      await accountAPI.changePassword({
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
+      setSuccess('Password changed successfully!');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : (typeof err === 'object' && err !== null && 'response' in err)
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined;
+      setError(message || 'Failed to change password');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUnfollow = async (followId: number) => {
+  const handleDeactivateAccount = async () => {
+    if (!confirm('Are you sure you want to deactivate your account? This action cannot be undone.')) {
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setLoading(true);
     try {
-      await followsAPI.delete(followId);
-      await fetchData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to unfollow user');
+      await accountAPI.deactivate();
+      logout();
+      router.push('/auth/login');
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : (typeof err === 'object' && err !== null && 'response' in err)
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined;
+      setError(message || 'Failed to deactivate account');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isFollowing = (userId: number) => {
-    return following.some((f) => f.following_id === userId);
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      logout();
+    }
   };
-
-  const getFollowId = (userId: number) => {
-    return following.find((f) => f.following_id === userId)?.id;
-  };
-
-  if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
-  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Follows</h1>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-bold">Settings</h1>
+
+      {success && (
+        <div className="p-3 text-sm text-green-600 bg-green-50 rounded-md flex items-center gap-2">
+          <CheckCircle className="h-4 w-4" />
+          {success}
+        </div>
+      )}
 
       {error && (
-        <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+        <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" />
           {error}
         </div>
       )}
 
-      <Tabs defaultValue="discover">
+      <Tabs defaultValue="account" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="followers">
-            Followers ({followers.length})
+          <TabsTrigger value="account">
+            <User className="h-4 w-4 mr-2" />
+            Account
           </TabsTrigger>
-          <TabsTrigger value="following">
-            Following ({following.length})
+          <TabsTrigger value="notifications">
+            <Bell className="h-4 w-4 mr-2" />
+            Notifications
           </TabsTrigger>
-          <TabsTrigger value="discover">Discover</TabsTrigger>
+          <TabsTrigger value="security">
+            <Lock className="h-4 w-4 mr-2" />
+            Security
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="followers" className="space-y-4">
-          {followers.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-gray-500">
-                No followers yet
-              </CardContent>
-            </Card>
-          ) : (
-            followers.map((follow) => {
-              const followerUser = allUsers.find((u) => u.id === follow.follower_id);
-              return (
-                <Card key={follow.id}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">@{followerUser?.username}</p>
-                      <p className="text-sm text-gray-500">{followerUser?.email}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </TabsContent>
+        {/* Account Tab */}
+        <TabsContent value="account" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>
+                Update your account details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="username" className="text-sm font-medium">
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={!isEditingProfile || loading}
+                    required
+                    minLength={3}
+                    maxLength={50}
+                  />
+                </div>
 
-        <TabsContent value="following" className="space-y-4">
-          {following.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-gray-500">
-                Not following anyone yet
-              </CardContent>
-            </Card>
-          ) : (
-            following.map((follow) => {
-              const followingUser = allUsers.find((u) => u.id === follow.following_id);
-              return (
-                <Card key={follow.id}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">@{followingUser?.username}</p>
-                      <p className="text-sm text-gray-500">{followingUser?.email}</p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleUnfollow(follow.id)}
-                    >
-                      Unfollow
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={!isEditingProfile || loading}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">User ID</label>
+                  <Input value={user?.id} disabled />
+                </div>
+
+                {isEditingProfile ? (
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={loading}>
+                      {loading ? 'Saving...' : 'Save Changes'}
                     </Button>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </TabsContent>
-
-        <TabsContent value="discover" className="space-y-4">
-          {allUsers.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-gray-500">
-                No users to discover
-              </CardContent>
-            </Card>
-          ) : (
-            allUsers.map((u) => (
-              <Card key={u.id}>
-                <CardContent className="p-4 flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold">@{u.username}</p>
-                    <p className="text-sm text-gray-500">{u.email}</p>
-                  </div>
-                  {isFollowing(u.id) ? (
                     <Button
+                      type="button"
                       variant="outline"
-                      size="sm"
                       onClick={() => {
-                        const followId = getFollowId(u.id);
-                        if (followId) handleUnfollow(followId);
+                        setUsername(user?.username || '');
+                        setEmail(user?.email || '');
+                        setIsEditingProfile(false);
+                        setError('');
+                        setSuccess('');
                       }}
+                      disabled={loading}
                     >
-                      Unfollow
+                      Cancel
                     </Button>
-                  ) : (
-                    <Button size="sm" onClick={() => handleFollow(u.id)}>
-                      Follow
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => setIsEditingProfile(true)}
+                  >
+                    Edit Profile
+                  </Button>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-600 flex items-center gap-2">
+                <Trash2 className="h-5 w-5" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription>
+                Irreversible actions
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Deactivate Account</p>
+                  <p className="text-sm text-gray-500">
+                    Temporarily deactivate your account
+                  </p>
+                </div>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeactivateAccount}
+                  disabled={loading}
+                >
+                  Deactivate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Preferences</CardTitle>
+              <CardDescription>
+                Choose what notifications you want to receive
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold">General</h3>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="emailNotifs" className="font-medium">Email Notifications</label>
+                    <p id="emailNotifs-desc" className="text-sm text-gray-500">
+                      Receive notifications via email
+                    </p>
+                  </div>
+                  <input
+                    id="emailNotifs"
+                    type="checkbox"
+                    checked={emailNotifs}
+                    onChange={(e) => setEmailNotifs(e.target.checked)}
+                    title="Email Notifications"
+                    aria-describedby="emailNotifs-desc"
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="pushNotifs" className="font-medium">Push Notifications</label>
+                    <p id="pushNotifs-desc" className="text-sm text-gray-500">
+                      Receive push notifications in browser
+                    </p>
+                  </div>
+                  <input
+                    id="pushNotifs"
+                    type="checkbox"
+                    checked={pushNotifs}
+                    onChange={(e) => setPushNotifs(e.target.checked)}
+                    title="Push Notifications"
+                    aria-describedby="pushNotifs-desc"
+                    className="h-4 w-4"
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold">Activity</h3>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="followNotifs" className="font-medium">New Followers</label>
+                    <p id="followNotifs-desc" className="text-sm text-gray-500">
+                      When someone follows you
+                    </p>
+                  </div>
+                  <input
+                    id="followNotifs"
+                    type="checkbox"
+                    checked={followNotifs}
+                    onChange={(e) => setFollowNotifs(e.target.checked)}
+                    title="New Followers"
+                    aria-describedby="followNotifs-desc"
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="likeNotifs" className="font-medium">Likes</label>
+                    <p id="likeNotifs-desc" className="text-sm text-gray-500">
+                      When someone likes your post
+                    </p>
+                  </div>
+                  <input
+                    id="likeNotifs"
+                    type="checkbox"
+                    checked={likeNotifs}
+                    onChange={(e) => setLikeNotifs(e.target.checked)}
+                    title="Likes"
+                    aria-describedby="likeNotifs-desc"
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="replyNotifs" className="font-medium">Replies</label>
+                    <p id="replyNotifs-desc" className="text-sm text-gray-500">
+                      When someone replies to your post
+                    </p>
+                  </div>
+                  <input
+                    id="replyNotifs"
+                    type="checkbox"
+                    checked={replyNotifs}
+                    onChange={(e) => setReplyNotifs(e.target.checked)}
+                    title="Replies"
+                    aria-describedby="replyNotifs-desc"
+                    className="h-4 w-4"
+                  />
+                </div>
+              </div>
+
+              <Button variant="default">
+                Save Preferences
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Security Tab */}
+        <TabsContent value="security" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>
+                Update your password to keep your account secure
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="oldPassword" className="text-sm font-medium">
+                    Current Password
+                  </label>
+                  <Input
+                    id="oldPassword"
+                    type="password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="newPassword" className="text-sm font-medium">
+                    New Password
+                  </label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                    minLength={8}
+                  />
+                  <p className="text-xs text-gray-500">
+                    Must be at least 8 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="text-sm font-medium">
+                    Confirm New Password
+                  </label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+
+                <Button type="submit" disabled={loading}>
+                  {loading ? 'Changing Password...' : 'Change Password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LogOut className="h-5 w-5" />
+                Logout
+              </CardTitle>
+              <CardDescription>
+                Sign out of your account on this device
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full sm:w-auto"
+              >
+                Logout
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-export default function FollowsPage() {
+export default function SettingsPage() {
   return (
     <ProtectedRoute>
-      <FollowsContent />
+      <SettingsContent />
     </ProtectedRoute>
   );
 }
