@@ -27,5 +27,5 @@ jobs:
         pip install -r backend/requirements.txt
     - name: Run Tests
       run: |
-        export DJANGO_SETTINGS_MODULE=backend.backend.settings
+        export DJANGO_SETTINGS_MODULE=backend.settings
         pytest backend/
