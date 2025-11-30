@@ -5,6 +5,7 @@ from .models import Message
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_username = serializers.ReadOnlyField(source="sender.username")
+    receiver = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Message

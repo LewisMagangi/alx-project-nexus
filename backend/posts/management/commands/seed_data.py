@@ -103,13 +103,16 @@ class Command(BaseCommand):
 
         # Sample post content
         post_contents = [
-            "Just finished reading an amazing book! 📚 Highly recommend it to everyone.",
+            "Just finished reading an amazing book! 📚 Highly recommend it.",
             "Beautiful sunset today! Nature never fails to amaze me. 🌅",
             "Started learning Python today. Any tips for beginners?",
             "Coffee is my fuel ☕ What's yours?",
             "Working on a new project. Excited to share soon! 💻",
             "Weekend vibes! Time to relax and recharge. 😊",
-            "Does anyone else think mornings are the best time for productivity?",
+            (
+                "Does anyone else think mornings are the best time "
+                "for productivity?"
+            ),
             "Just tried a new recipe and it turned out great! 🍳",
             "Motivation Monday: You got this! 💪",
             "Traveling to a new city next week. Any recommendations?",

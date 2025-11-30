@@ -2,7 +2,11 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from .models import Community, CommunityMember, CommunityPost
-from .serializers import CommunityPostSerializer, CommunitySerializer
+from .serializers import (
+    CommunityPostSerializer,
+    CommunitySerializer,
+    EmptySerializer,
+)
 
 
 class CommunityListCreateView(generics.ListCreateAPIView):
@@ -12,9 +16,6 @@ class CommunityListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
-
-from .serializers import EmptySerializer
 
 
 class CommunityJoinView(generics.GenericAPIView):
