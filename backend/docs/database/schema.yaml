@@ -1327,6 +1327,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSearchResultList'
           description: ''
+  /api/users/:
+    get:
+      operationId: users_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicUserList'
+          description: ''
 components:
   schemas:
     Account:
@@ -1487,6 +1514,7 @@ components:
           readOnly: true
         receiver:
           type: integer
+          readOnly: true
         content:
           type: string
         created_at:
@@ -1501,6 +1529,7 @@ components:
       - created_at
       - id
       - is_read
+      - receiver
       - sender_username
     Notification:
       type: object
@@ -1721,6 +1750,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Post'
+    PaginatedPublicUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUser'
     PaginatedSearchResultList:
       type: object
       required:
@@ -1909,6 +1961,26 @@ components:
       - replies_count
       - user
       - username
+    PublicUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/UserProfile'
+          readOnly: true
+      required:
+      - id
+      - profile
+      - username
     Register:
       type: object
       properties:
@@ -1982,6 +2054,11 @@ components:
       required:
       - access
       - refresh
+    UserProfile:
+      type: object
+      properties:
+        accepted_legal_policies:
+          type: boolean
   securitySchemes:
     jwtAuth:
       type: http
