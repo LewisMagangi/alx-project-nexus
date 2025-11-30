@@ -28,6 +28,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
     serializer_class = BookmarkSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "delete"]  # No PUT/PATCH
+    lookup_field = "id"
 
     def get_queryset(self):
         """Return only current user's bookmarks"""

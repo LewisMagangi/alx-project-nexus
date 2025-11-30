@@ -1,17 +1,13 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Notification
 from .serializers import NotificationSerializer
 
 
-# Create your views here.
 class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user).order_by(
@@ -19,13 +15,22 @@ class NotificationListView(generics.ListAPIView):
         )
 
 
-class NotificationMarkReadView(APIView):
-    permission_classes = [IsAuthenticated]
+class NotificationMarkReadView(generics.UpdateAPIView):
 
-    def post(self, request, pk):
-        notification = get_object_or_404(
-            Notification, pk=pk, user=request.user
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = "pk"
+
+    def post(self, request, *args, **kwargs):
+        return self.patch(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        obj.is_read = True
+        obj.save()
+        return Response(
+            {"message": "Marked as read"}, status=status.HTTP_200_OK
         )
-        notification.is_read = True
-        notification.save()
-        return Response({"message": "Marked as read"})

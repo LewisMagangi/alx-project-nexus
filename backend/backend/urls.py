@@ -32,4 +32,5 @@ urlpatterns = [
     path("api/messages/", include("usermessages.urls")),
     path("api/communities/", include("communities.urls")),
     path("api/", include("account.urls")),
+    path("api/users/", include("users.urls")),
 ]

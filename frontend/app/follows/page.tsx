@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { followsAPI, usersAPI } from '@/services/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface User {
@@ -30,11 +30,15 @@ function FollowsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  // helper to extract an error message from unknown error shapes (incl. axios)
+  const getErrorMessage = (error: unknown, fallback = 'An error occurred') => {
+    if (typeof error === 'string') return error;
+    if (error instanceof Error) return error.message;
+    const errObj = error as { response?: { data?: { message?: string } } } | undefined;
+    return errObj?.response?.data?.message || fallback;
+  };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [followsRes, usersRes] = await Promise.all([
         followsAPI.getAll(),
@@ -45,19 +49,23 @@ function FollowsContent() {
       setFollowers(allFollows.filter((f: Follow) => f.following_id === user?.id));
       setFollowing(allFollows.filter((f: Follow) => f.follower_id === user?.id));
       setAllUsers(usersRes.data.filter((u: User) => u.id !== user?.id));
-    } catch (err) {
-      setError('Failed to load data');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load data'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleFollow = async (userId: number) => {
     try {
       await followsAPI.create(userId);
       await fetchData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to follow user');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to follow user'));
     }
   };
 
@@ -65,8 +73,8 @@ function FollowsContent() {
     try {
       await followsAPI.delete(followId);
       await fetchData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to unfollow user');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to unfollow user'));
     }
   };
 
