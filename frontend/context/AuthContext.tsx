@@ -1,3 +1,4 @@
+// frontend/context/AuthContext.tsx
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -14,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, accepted_legal_policies?: boolean) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
 }
@@ -32,7 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('token');
 
     if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        // Invalid stored data, clear it
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
     setLoading(false);
   }, []);
@@ -47,30 +54,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userData);
 
       router.push('/dashboard');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+    } catch (error: unknown) {
+      // Safely narrow unknown into the expected shape without using `any`
+      let errorMessage = 'Login failed. Please check your credentials.';
+      if (typeof error === 'object' && error !== null) {
+        const errObj = error as { response?: { data?: unknown } };
+        const data = errObj.response?.data;
+        if (typeof data === 'object' && data !== null) {
+          const d = data as Record<string, unknown>;
+          if (typeof d.detail === 'string') {
+            errorMessage = d.detail;
+          } else if (typeof d.error === 'string') {
+            errorMessage = d.error;
+          }
+        }
+      }
+      throw new Error(errorMessage);
     }
   };
-
-  const register = async (username: string, email: string, password: string, accepted_legal_policies: boolean = true) => {
+  const register = async (username: string, email: string, password: string) => {
     try {
-      const response = await authAPI.register({ username, email, password, accepted_legal_policies });
-      // Optionally, log in after registration
+      await authAPI.register({ username, email, password, accepted_legal_policies: true });
+      // Auto-login after successful registration
       await login(username, password);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    } catch (error: unknown) {
+      // Safely narrow unknown into the expected shape without using `any`
+      let errorMessage = 'Registration failed. Please try again.';
+      if (typeof error === 'object' && error !== null) {
+        const errObj = error as { response?: { data?: unknown } };
+        const data = errObj.response?.data;
+        if (typeof data === 'object' && data !== null) {
+          const d = data as Record<string, unknown>;
+          if (typeof d.error === 'string') {
+            errorMessage = d.error;
+          } else if (Array.isArray(d.username) && typeof d.username[0] === 'string') {
+            errorMessage = d.username[0] as string;
+          } else if (Array.isArray(d.email) && typeof d.email[0] === 'string') {
+            errorMessage = d.email[0] as string;
+          } else if (Array.isArray(d.password) && typeof d.password[0] === 'string') {
+            errorMessage = d.password[0] as string;
+          }
+        }
+      }
+      throw new Error(errorMessage);
     }
   };
 
   const logout = () => {
-    authAPI.logout().catch(() => {
-      // Ignore errors, logout locally anyway
-    });
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/auth/login');
+    try {
+      authAPI.logout().catch(() => {
+        // Ignore errors, logout locally anyway
+      });
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      router.push('/auth/login');
+    }
   };
 
   return (
