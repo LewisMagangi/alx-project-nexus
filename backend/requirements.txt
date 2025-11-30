@@ -1,4 +1,9 @@
-﻿asgiref==3.10.0
+﻿dj-database-url
+whitenoise
+gunicorn
+python-dotenv
+psycopg2-binary
+asgiref==3.10.0
 astroid==4.0.2
 attrs==25.4.0
 autoflake==2.3.1
