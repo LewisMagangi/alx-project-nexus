@@ -191,7 +191,7 @@ CSRF_TRUSTED_ORIGINS = [
     o.strip()
     for o in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
-        "https://nexus-frontend.vercel.app,https://*.onrender.com",
+        "https://*.vercel.app,https://*.onrender.com",
     ).split(",")
     if o.strip()
 ]
