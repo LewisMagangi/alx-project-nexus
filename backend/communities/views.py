@@ -14,7 +14,11 @@ class CommunityListCreateView(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 
+from .serializers import EmptySerializer
+
+
 class CommunityJoinView(generics.GenericAPIView):
+    serializer_class = EmptySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, community_id):

@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Follow, Like, Post
@@ -27,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
             "is_deleted",
         ]
 
+    @extend_schema_field(serializers.IntegerField())
     def get_replies_count(self, obj):
         return obj.replies.filter(is_deleted=False).count()
 

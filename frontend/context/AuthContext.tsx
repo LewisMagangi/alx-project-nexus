@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string, accepted_legal_policies?: boolean) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
 }
@@ -52,9 +52,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (username: string, email: string, password: string, accepted_legal_policies: boolean = true) => {
     try {
-      const response = await authAPI.register({ username, email, password });
+      const response = await authAPI.register({ username, email, password, accepted_legal_policies });
       // Optionally, log in after registration
       await login(username, password);
     } catch (error: any) {

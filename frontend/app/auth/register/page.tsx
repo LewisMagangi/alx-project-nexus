@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
   const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,10 +31,13 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!acceptedLegal) {
+      setError('You must accept the legal policies to register.');
+      return;
+    }
     setLoading(true);
-
     try {
-      await register(username, email, password);
+      await register(username, email, password, acceptedLegal);
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -117,6 +121,23 @@ export default function RegisterPage() {
                 required
                 disabled={loading}
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="acceptedLegal"
+                type="checkbox"
+                checked={acceptedLegal}
+                onChange={(e) => setAcceptedLegal(e.target.checked)}
+                required
+                disabled={loading}
+              />
+              <label htmlFor="acceptedLegal" className="text-sm">
+                I have read and accept the{' '}
+                <Link href="/legal" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+                  legal policies
+                </Link>
+              </label>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

@@ -1,3 +1,12 @@
+# Add missing import
+from rest_framework import serializers
+
+
+# Used for endpoints with no request body to document schema
+class EmptySerializer(serializers.Serializer):
+    pass
+
+
 from rest_framework import serializers
 
 from .models import Community, CommunityPost

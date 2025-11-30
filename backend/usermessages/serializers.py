@@ -17,3 +17,4 @@ class MessageSerializer(serializers.ModelSerializer):
             "is_read",
         ]
         read_only_fields = ["sender_username", "created_at", "is_read"]
+        extra_kwargs = {"receiver": {"write_only": True, "required": False}}

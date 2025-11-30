@@ -1,47 +1,60 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
+
+from .serializers import (
+    AccountSerializer,
+    EmptySerializer,
+    PasswordChangeSerializer,
+)
 
 
-# Create your views here.
-class AccountUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
+class AccountUpdateView(generics.UpdateAPIView):
+    """Update account info (maps to PUT/PATCH /api/account/)"""
 
-    def put(self, request):
-        user = request.user
-        user.username = request.data.get("username", user.username)
-        user.email = request.data.get("email", user.email)
-        user.save()
-        return Response({"message": "Updated successfully"})
+    serializer_class = AccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
-class PasswordChangeView(APIView):
-    permission_classes = [IsAuthenticated]
+class PasswordChangeView(generics.UpdateAPIView):
+    """Change password"""
 
-    def post(self, request):
-        if not request.user.check_password(request.data["old_password"]):
-            return Response({"error": "Incorrect password"}, status=400)
-        request.user.set_password(request.data["new_password"])
+    serializer_class = PasswordChangeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def post(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        request.user.set_password(serializer.validated_data["new_password"])
         request.user.save()
-        return Response({"message": "Password updated"})
-
-
-# Account deletion/deactivation view
-class AccountDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request):
-        user = request.user
-        # Option 1: Deactivate (recommended for audit)
-        user.is_active = False
-        user.save()
-        return Response({"message": "Account deactivated"}, status=200)
-
-    def post(self, request):
-        # Option 2: Hard delete (uncomment if you want permanent deletion)
-        # user = request.user
-        # user.delete()
-        # return Response({"message": "Account deleted"}, status=200)
         return Response(
-            {"error": "Use DELETE method to deactivate account."}, status=405
+            {"detail": "Password changed"}, status=status.HTTP_200_OK
+        )
+
+
+class AccountDeleteView(generics.DestroyAPIView):
+    """Delete account"""
+
+    serializer_class = EmptySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        return Response(
+            {"detail": "Account deactivated"}, status=status.HTTP_200_OK
         )
