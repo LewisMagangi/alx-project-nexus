@@ -1,19 +1,6 @@
-from django.db import models
-from posts.models import Post
+# Hashtag and PostHashtag models are defined in posts.models
+# This app can be used for hashtag-specific views/serializers
+# but the models live in the posts app to avoid duplication
 
-
-# Create your models here.
-class Hashtag(models.Model):
-    tag = models.CharField(max_length=100, unique=True)
-
-
-class PostHashtag(models.Model):
-    post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="post_hashtags"
-    )
-    hashtag = models.ForeignKey(
-        Hashtag, on_delete=models.CASCADE, related_name="hashtag_posts"
-    )
-
-    class Meta:
-        unique_together = ("post", "hashtag")
+# To access Hashtag models, import from posts:
+# from posts.models import Hashtag, PostHashtag
