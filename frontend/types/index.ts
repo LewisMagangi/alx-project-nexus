@@ -18,8 +18,8 @@ export interface Post {
   content: string;
   created_at: string;
 
-  // User info - backend returns 'user' as ID and 'user_data' as object
-  user: number;  // User ID from backend
+  // User info - backend may return 'user' as ID or object, and 'user_data' as object
+  user: number | UserMini;  // User ID or object from backend
   user_id?: number;  // Legacy support
   username: string;
   user_data?: UserMini;  // Full user object from backend

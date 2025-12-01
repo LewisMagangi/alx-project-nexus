@@ -361,7 +361,7 @@ export default function PostCard({
         )}
 
         {/* Quoted post (for quote tweets) */}
-        {post.is_quote_tweet && post.retweet_of && (
+        {post.is_quote_tweet && typeof post.retweet_of === 'object' && post.retweet_of !== null && (
           <div className="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">
