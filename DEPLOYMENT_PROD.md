@@ -1,20 +1,5 @@
 # Project Nexus Production Deployment Guide
 
-This guide will help you deploy Project Nexus to production using:
-
-- **Vercel** for the Next.js frontend
-- **Render** for the Django backend
-- **Neon** for the PostgreSQL database
-
----
-
-## 📋 Prerequisites
-
-- GitHub account with your Project Nexus repo
-- Vercel account ([vercel.com](https://vercel.com))
-- Render account ([render.com](https://render.com))
-- Neon account ([neon.tech](https://neon.tech))
-
 ---
 
 ## 🚀 Backend Deployment (Render + Neon)
@@ -23,7 +8,7 @@ This guide will help you deploy Project Nexus to production using:
 
 1. Go to [neon.tech](https://neon.tech) and sign up/log in
 2. Create a new project (e.g., `nexus-prod-db`)
-3. Note the connection string (starts with `postgres://`)
+3. Note the connection string (starts with `postgres://`). **Do not wrap the DATABASE_URL in single or double quotes when setting it in your environment variables.**
 4. Set password and region as needed
 
 ### 2. Deploy Django Backend on Render
@@ -36,8 +21,8 @@ This guide will help you deploy Project Nexus to production using:
    - **Branch**: `prod` (or your production branch)
    - **Root Directory**: `backend` (or wherever your manage.py is)
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput`
-   - **Start Command**: `gunicorn backend.wsgi:application`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py seed_data && python manage.py collectstatic --noinput`
+   - **Start Command**: `gunicorn backend.wsgi`
    - **Instance Type**: Free or paid as needed
 
 ### 3. Add Environment Variables (Render)
@@ -53,8 +38,11 @@ ALLOWED_HOSTS=.onrender.com,vercel.app,your-custom-domain.com
 # Database (from Neon)
 DATABASE_URL=postgres://<user>:<password>@<host>/<db>?sslmode=require
 
-# CORS
-CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app,http://localhost:3000
+# CORS (wildcards not supported, list your main Vercel domain(s))
+CORS_ALLOWED_ORIGINS=https://alx-project-nexus-social.vercel.app/,http://localhost:3000
+
+# CSRF (wildcards supported, allow all .vercel.app for previews and production)
+CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://*.onrender.com
 
 # Frontend URL
 FRONTEND_URL=https://your-frontend.vercel.app
@@ -73,6 +61,7 @@ DEFAULT_FROM_EMAIL=noreply@nexus.com
 - Generate a new `SECRET_KEY` for production
 - Use the Neon connection string for `DATABASE_URL` (with `sslmode=require`)
 - Update CORS and ALLOWED_HOSTS after frontend deploy
+- For Vercel preview/production support, use your main Vercel domain in `CORS_ALLOWED_ORIGINS` and `https://*.vercel.app` in `CSRF_TRUSTED_ORIGINS`.
 
 ### 4. Deploy and Monitor
 
@@ -87,6 +76,14 @@ DEFAULT_FROM_EMAIL=noreply@nexus.com
   ```bash
   python manage.py createsuperuser
   ```
+
+### 6. Generate a Secret Key
+
+To generate a secure `SECRET_KEY` for your Django application, use the [Djecrety](https://djecrety.ir/) tool:
+
+1. Visit [https://djecrety.ir/](https://djecrety.ir/).
+2. Copy the generated key.
+3. Add it to your Render environment variables under `SECRET_KEY`.
 
 ---
 
@@ -128,9 +125,34 @@ NODE_ENV=production
 1. Go back to Render → Web Service → Environment
 2. Update:
    - `CORS_ALLOWED_ORIGINS=https://nexus-frontend.vercel.app`
+   - `CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://*.onrender.com`
    - `FRONTEND_URL=https://nexus-frontend.vercel.app`
    - `ALLOWED_HOSTS=.onrender.com,nexus-frontend.vercel.app`
 3. Save and redeploy
+
+---
+
+## Environment Variable Best Practices
+
+**Important:**
+
+- Never wrap environment variable values in single ('') or double ("") quotes. For example, use:
+
+  `DATABASE_URL=postgresql://user:password@host/db?sslmode=require`
+
+  **Not:**
+
+  `'postgresql://user:password@host/db?sslmode=require'` or `"postgresql://user:password@host/db?sslmode=require"`
+
+- CORS origins must not have trailing slashes or paths. For example, use:
+
+  `CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app`
+
+  **Not:**
+
+  `https://your-frontend.vercel.app/` or `https://your-frontend.vercel.app/somepath`
+
+- Always provide a `.env.example` file (tracked in git) with all required environment variables and fake/sample values. Never commit real `.env` or `.env.production` files to git.
 
 ---
 
