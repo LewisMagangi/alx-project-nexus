@@ -1,18 +1,6 @@
-// ============================================
-// USERS API
-// ============================================
-export const usersAPI = {
-  getAll: (params?: { search?: string; limit?: number; offset?: number }) =>
-    api.get('/api/users/', { params }),
-
-  getById: (id: number) => api.get(`/api/users/${id}/`),
-
-  update: (id: number, data: { username?: string; email?: string }) =>
-    api.patch(`/api/users/${id}/`, data),
-
-  delete: (id: number) => api.delete(`/api/users/${id}/`),
-};
 import axios, { AxiosInstance } from 'axios';
+
+type PaginationParams = { search?: string; limit?: number; offset?: number };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -103,6 +91,25 @@ export const postsAPI = {
   getHomeFeed: () => api.get('/api/posts/home/'),
 
   getUserPosts: (userId: number) => api.get(`/api/posts/user/${userId}/`),
+
+  // --- Advanced/Thread/Retweet/Hashtag/Mention ---
+  retweet: (postId: number) =>
+    api.post(`/api/posts/${postId}/retweet/`),
+
+  unretweet: (postId: number) =>
+    api.post(`/api/posts/${postId}/unretweet/`),
+
+  getThread: (postId: number) =>
+    api.get(`/api/posts/${postId}/thread/`),
+
+  getTrendingHashtags: () =>
+    api.get(`/api/posts/trending_hashtags/`),
+
+  getByHashtag: (tag: string, params?: PaginationParams) =>
+    api.get(`/api/posts/`, { params: { ...params, hashtag: tag } }),
+
+  getByMention: (username: string, params?: PaginationParams) =>
+    api.get(`/api/posts/`, { params: { ...params, mention: username } }),
 };
 
 // ============================================
@@ -124,8 +131,10 @@ export const followsAPI = {
   getAll: (params?: { limit?: number; offset?: number }) =>
     api.get('/api/follows/', { params }),
 
-  create: (followingId: number) =>
-    api.post('/api/follows/', { follower: 0, following: followingId }),
+  create: (followingId: number) => {
+    console.log('Creating follow with data:', { following: followingId });
+    return api.post('/api/follows/', { following: followingId });
+  },
 
   delete: (id: number) => api.delete(`/api/follows/${id}/`),
 };
@@ -203,6 +212,23 @@ export const accountAPI = {
     api.post('/api/account/password/', data),
 
   deactivate: () => api.delete('/api/account/delete/'),
+};
+
+// ============================================
+// USERS API
+// ============================================
+export const usersAPI = {
+  getAll: (params?: { search?: string; limit?: number; offset?: number }) =>
+    api.get('/api/users/', { params }),
+
+  getById: (id: number) => api.get(`/api/users/${id}/`),
+
+  getByUsername: (username: string) => api.get(`/api/users/${username}/`),
+
+  update: (id: number, data: { username?: string; email?: string }) =>
+    api.patch(`/api/users/${id}/`, data),
+
+  delete: (id: number) => api.delete(`/api/users/${id}/`),
 };
 
 export default api;
