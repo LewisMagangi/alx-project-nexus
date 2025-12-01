@@ -15,15 +15,27 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables from .env.production if it exists
-env_path = os.path.join(
-    Path(__file__).resolve().parent.parent, ".env.production"
-)
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Determine environment: production, staging, or development
+# Set DJANGO_ENV=production in your production environment (Render, etc.)
+DJANGO_ENV = os.getenv("DJANGO_ENV", "development").lower()
+IS_PRODUCTION = DJANGO_ENV == "production"
+IS_STAGING = DJANGO_ENV == "staging"
+IS_DEVELOPMENT = DJANGO_ENV == "development"
+
+# Load environment variables from .env files
+# In production, environment variables should be set directly (not from files)
+env_path = BASE_DIR / ".env"
+env_prod_path = BASE_DIR / ".env.production"
+
+if IS_DEVELOPMENT:
+    # For local development, prefer .env file
+    if env_path.exists():
+        load_dotenv(env_path)
+    elif env_prod_path.exists():
+        load_dotenv(env_prod_path)
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,15 +44,35 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY environment variable must be set for production!")
+    if IS_PRODUCTION:
+        raise RuntimeError(
+            "SECRET_KEY environment variable is required in production! "
+            "Set it in your Render/hosting environment variables."
+        )
+    else:
+        # Use a default key for development only
+        SECRET_KEY = "dev-secret-key-not-for-production-use"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "yes"]
+# In production, DEBUG is always False unless explicitly overridden
+if IS_PRODUCTION:
+    DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "yes"]
+else:
+    DEBUG = os.getenv("DEBUG", "True").lower() in ["true", "1", "yes"]
 
-# ALLOWED_HOSTS from env, split by comma
-ALLOWED_HOSTS = [
-    h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()
-]
+# ALLOWED_HOSTS configuration
+# In production, this MUST be set via environment variable
+_allowed = os.getenv("ALLOWED_HOSTS", "")
+if _allowed:
+    ALLOWED_HOSTS = [h.strip() for h in _allowed.split(",") if h.strip()]
+elif IS_PRODUCTION:
+    raise RuntimeError(
+        "ALLOWED_HOSTS environment variable is required in production! "
+        "Set it to your domain(s), e.g., 'your-app.onrender.com'"
+    )
+else:
+    # Development defaults
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
 
 # Application definition
@@ -74,6 +106,7 @@ INSTALLED_APPS = [
     "blocks",
     "reports",
 ]
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -118,76 +151,164 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-# Database# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databasesdocs.djangoproject.com/en/5.2/ref/settings/#databases
-
 import dj_database_url
 
-DATABASES = {
-    "default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))
-}
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {"default": dj_database_url.config(default=DATABASE_URL)}
+elif IS_PRODUCTION:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is required in production! "
+        "Set it to your PostgreSQL connection string."
+    )
+else:
+    # Use SQLite for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
-# Password validation# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validatorsproject.com/en/5.2/ref/settings/#auth-password-validators
+# Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "NumericPasswordValidator",
     },
 ]
 
 
-# Internationalization# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/roject.com/en/5.2/topics/i18n/
+# Internationalization
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
-USE_I18N = TrueUSE_I18N = True
-
-USE_TZ = TrueUSE_TZ = True
+USE_I18N = True
+USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/howto/static-files/
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Use WhiteNoise for static file serving in production
+if IS_PRODUCTION:
+    STATICFILES_STORAGE = (
+        "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    )
 
-# Default primary key field type# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field/en/5.2/ref/settings/#default-auto-field
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# CORS_ALLOWED_ORIGINS from env, split by comma
-CORS_ALLOWED_ORIGINS = [
-    o.strip()
-    for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(
-        ","
-    )
-    if o.strip()
-]
+# CORS configuration
+_cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if _cors_origins:
+    CORS_ALLOWED_ORIGINS = [
+        o.strip() for o in _cors_origins.split(",") if o.strip()
+    ]
+elif IS_PRODUCTION:
+    # In production, CORS must be explicitly configured
+    CORS_ALLOWED_ORIGINS = []
+else:
+    # Development defaults
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    o.strip()
-    for o in os.getenv(
-        "CSRF_TRUSTED_ORIGINS",
-        "https://*.vercel.app,https://*.onrender.com",
-    ).split(",")
-    if o.strip()
-]
+# CSRF configuration
+_csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        o.strip() for o in _csrf_origins.split(",") if o.strip()
+    ]
+elif IS_PRODUCTION:
+    # Production defaults for common hosting platforms
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.vercel.app",
+        "https://*.onrender.com",
+    ]
+else:
+    # Development defaults
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+
+# Security settings for production
+if IS_PRODUCTION:
+    # HTTPS/SSL settings
+    SECURE_SSL_REDIRECT = os.getenv(
+        "SECURE_SSL_REDIRECT", "True"
+    ).lower() in ["true", "1", "yes"]
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # HSTS settings
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Other security settings
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = "DENY"
+
+
+# Logging configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO" if IS_PRODUCTION else "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO" if IS_PRODUCTION else "DEBUG",
+            "propagate": False,
+        },
+    },
+}

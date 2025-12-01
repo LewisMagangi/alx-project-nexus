@@ -21,7 +21,8 @@
       User,
       Settings,
       LogOut,
-      MoreHorizontal
+      MoreHorizontal,
+      Users
     } from 'lucide-react';
 
     export default function Navbar() {
@@ -42,6 +43,7 @@
         { href: '/explore', icon: Search, label: 'Explore' },
         { href: '/notifications', icon: Bell, label: 'Notifications' },
         { href: '/messages', icon: Mail, label: 'Messages' },
+        { href: '/follows', icon: Users, label: 'Follows' },
         { href: '/bookmarks', icon: Bookmark, label: 'Bookmarks' },
         { href: '/profile', icon: User, label: 'Profile' },
       ];
@@ -95,6 +97,25 @@
                     <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
                       <Settings className="h-4 w-4" />
                       Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/legal/terms" className="flex items-center gap-2 cursor-pointer">
+                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2" />
+                      Terms of Service
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/legal/privacy" className="flex items-center gap-2 cursor-pointer">
+                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2" />
+                      Privacy Policy
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/legal/cookies" className="flex items-center gap-2 cursor-pointer">
+                      <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2" />
+                      Cookie Policy
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -203,19 +224,19 @@
           {/* Mobile Bottom Navigation */}
           <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t">
             <div className="flex justify-around py-2">
-              {navItems.slice(0, 5).map((item) => {
+              {navItems.slice(0, 6).map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex flex-col items-center px-3 py-2 ${
+                    className={`flex flex-col items-center px-2 py-2 ${
                       isActive ? 'text-blue-600' : 'text-gray-500'
                     }`}
                   >
-                    <Icon className={`h-6 w-6 ${isActive ? 'stroke-[2.5]' : ''}`} />
-                    <span className="text-xs mt-1">{item.label}</span>
+                    <Icon className={`h-5 w-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
+                    <span className="text-[10px] mt-1">{item.label}</span>
                   </Link>
                 );
               })}

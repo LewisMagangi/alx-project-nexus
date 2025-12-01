@@ -7,7 +7,18 @@ from .models import UserProfile
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ["accepted_legal_policies"]
+        fields = [
+            "accepted_legal_policies",
+            "bio",
+            "location",
+            "website",
+            "avatar_url",
+            "header_url",
+            "followers_count",
+            "following_count",
+            "posts_count",
+            "is_verified",
+        ]
 
 
 class PublicUserSerializer(serializers.ModelSerializer):

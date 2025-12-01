@@ -16,8 +16,8 @@ interface User {
 
 interface Follow {
   id: number;
-  follower_id: number;
-  following_id: number;
+  follower: number;
+  following: number;
   follower_username?: string;
   following_username?: string;
 }
@@ -34,8 +34,14 @@ function FollowsContent() {
   const getErrorMessage = (error: unknown, fallback = 'An error occurred') => {
     if (typeof error === 'string') return error;
     if (error instanceof Error) return error.message;
-    const errObj = error as { response?: { data?: { message?: string } } } | undefined;
-    return errObj?.response?.data?.message || fallback;
+    const errObj = error as { response?: { data?: { message?: string; detail?: string; following?: string[] } } } | undefined;
+    
+    // Check for DRF validation errors
+    if (errObj?.response?.data?.detail) return errObj.response.data.detail;
+    if (errObj?.response?.data?.following) return errObj.response.data.following[0];
+    if (errObj?.response?.data?.message) return errObj.response.data.message;
+    
+    return fallback;
   };
 
   const fetchData = useCallback(async () => {
@@ -45,10 +51,18 @@ function FollowsContent() {
         usersAPI.getAll(),
       ]);
 
-      const allFollows = followsRes.data;
-      setFollowers(allFollows.filter((f: Follow) => f.following_id === user?.id));
-      setFollowing(allFollows.filter((f: Follow) => f.follower_id === user?.id));
-      setAllUsers(usersRes.data.filter((u: User) => u.id !== user?.id));
+      // Handle both paginated and array responses
+      const allFollows = Array.isArray(followsRes.data) 
+        ? followsRes.data 
+        : (followsRes.data.results || []);
+      
+      const allUsersData = Array.isArray(usersRes.data)
+        ? usersRes.data
+        : (usersRes.data.results || []);
+
+      setFollowers(allFollows.filter((f: Follow) => f.following === user?.id));
+      setFollowing(allFollows.filter((f: Follow) => f.follower === user?.id));
+      setAllUsers(allUsersData.filter((u: User) => u.id !== user?.id));
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to load data'));
     } finally {
@@ -62,9 +76,14 @@ function FollowsContent() {
 
   const handleFollow = async (userId: number) => {
     try {
-      await followsAPI.create(userId);
+      console.log('Attempting to follow user ID:', userId);
+      const response = await followsAPI.create(userId);
+      console.log('Follow response:', response);
       await fetchData();
     } catch (err: unknown) {
+      console.error('Follow error:', err);
+      const axiosErr = err as { response?: { data?: unknown } };
+      console.error('Error response data:', axiosErr?.response?.data);
       setError(getErrorMessage(err, 'Failed to follow user'));
     }
   };
@@ -79,11 +98,11 @@ function FollowsContent() {
   };
 
   const isFollowing = (userId: number) => {
-    return following.some((f) => f.following_id === userId);
+    return following.some((f) => f.following === userId);
   };
 
   const getFollowId = (userId: number) => {
-    return following.find((f) => f.following_id === userId)?.id;
+    return following.find((f) => f.following === userId)?.id;
   };
 
   if (loading) {
@@ -120,7 +139,7 @@ function FollowsContent() {
             </Card>
           ) : (
             followers.map((follow) => {
-              const followerUser = allUsers.find((u) => u.id === follow.follower_id);
+              const followerUser = allUsers.find((u) => u.id === follow.follower);
               return (
                 <Card key={follow.id}>
                   <CardContent className="p-4 flex justify-between items-center">
@@ -144,7 +163,7 @@ function FollowsContent() {
             </Card>
           ) : (
             following.map((follow) => {
-              const followingUser = allUsers.find((u) => u.id === follow.following_id);
+              const followingUser = allUsers.find((u) => u.id === follow.following);
               return (
                 <Card key={follow.id}>
                   <CardContent className="p-4 flex justify-between items-center">

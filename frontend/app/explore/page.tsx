@@ -123,9 +123,9 @@ function ExploreContent() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Search bar */}
-      <form onSubmit={handleSearch} className="flex items-center gap-2">
+      <form onSubmit={handleSearch} className="flex items-center gap-2 mb-4">
         <input
           type="text"
           value={searchQuery}
@@ -141,11 +141,17 @@ function ExploreContent() {
       {/* Search Results or Browse Content */}
       {searchQuery && searchResults.users.length + searchResults.posts.length > 0 ? (
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="users">
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger 
+              value="users" 
+              className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
+            >
               Users ({searchResults.users.length})
             </TabsTrigger>
-            <TabsTrigger value="posts">
+            <TabsTrigger 
+              value="posts" 
+              className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
+            >
               Posts ({searchResults.posts.length})
             </TabsTrigger>
           </TabsList>
@@ -210,9 +216,19 @@ function ExploreContent() {
         </Tabs>
       ) : (
         <Tabs defaultValue="posts" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="posts">All Posts</TabsTrigger>
-            <TabsTrigger value="users">Suggested Users</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger 
+              value="posts" 
+              className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
+            >
+              All Posts
+            </TabsTrigger>
+            <TabsTrigger 
+              value="users" 
+              className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
+            >
+              Suggested Users
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="space-y-3">

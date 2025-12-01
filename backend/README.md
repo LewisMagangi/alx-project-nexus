@@ -9,9 +9,9 @@ Django REST Framework backend for the Project Nexus social media platform.
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Django 5.2.5 + Django REST Framework
+- **Framework**: Django 5.2.8 + Django REST Framework
 - **Authentication**: JWT (Simple JWT)
-- **Database**: PostgreSQL (Neon)
+- **Database**: PostgreSQL (Neon) / SQLite (development)
 - **Deployment**: Render
 - **Static Files**: Whitenoise
 
@@ -21,8 +21,8 @@ Django REST Framework backend for the Project Nexus social media platform.
 backend/
 ├── backend/           # Main Django project settings
 ├── authentication/    # JWT auth, login, register
-├── users/             # User profiles
-├── posts/             # Posts/tweets
+├── users/             # User profiles (bio, avatar, location, etc.)
+├── posts/             # Posts/tweets with hashtags & mentions
 ├── likes/             # Post likes
 ├── follows/           # User follows
 ├── bookmarks/         # Saved posts
@@ -31,6 +31,10 @@ backend/
 ├── communities/       # Community groups
 ├── search/            # Search functionality
 ├── account/           # Account management
+├── legal/             # Terms, privacy, cookies policies
+├── hashtags/          # Hashtag tracking & trending
+├── blocks/            # User blocking
+├── reports/           # Content reporting
 ├── templates/         # Django HTML templates
 ├── static/            # Static files (CSS, JS)
 └── docs/              # API & database documentation
@@ -42,7 +46,7 @@ backend/
 
 - Python 3.11+
 - pip
-- PostgreSQL (or use Neon cloud database)
+- PostgreSQL (optional - SQLite works for development)
 
 ### Local Development Setup
 
@@ -75,7 +79,8 @@ backend/
 
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env - most settings are optional for development
+   # The defaults work out of the box!
    ```
 
 5. **Run migrations**:
@@ -90,31 +95,44 @@ backend/
    python manage.py createsuperuser
    ```
 
-7. **Seed test data** (optional):
-
-   ```bash
-   python manage.py seed_data
-   ```
-
-8. **Run development server**:
+7. **Run development server**:
 
    ```bash
    python manage.py runserver
    ```
 
+   That's it! The server runs with sensible defaults (SQLite, DEBUG=True, localhost).
+
 ## 🔐 Environment Variables
 
-Copy `.env.example` to `.env` and configure:
+The app uses `DJANGO_ENV` to detect the environment and apply appropriate defaults.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `SECRET_KEY` | Django secret key | Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
-| `DEBUG` | Debug mode | `False` for production |
-| `ALLOWED_HOSTS` | Allowed host domains | `.onrender.com,localhost` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@host/db?sslmode=require` |
-| `CORS_ALLOWED_ORIGINS` | Frontend URLs for CORS | `https://your-frontend.vercel.app` |
-| `CSRF_TRUSTED_ORIGINS` | Trusted origins for CSRF | `https://*.vercel.app` |
-| `FRONTEND_URL` | Frontend base URL | `https://your-frontend.vercel.app` |
+### Development (default)
+
+Most settings are **optional** - the app works out of the box:
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| `DJANGO_ENV` | No | `development` |
+| `SECRET_KEY` | No | Auto-generated dev key |
+| `DEBUG` | No | `True` |
+| `DATABASE_URL` | No | SQLite (`db.sqlite3`) |
+| `ALLOWED_HOSTS` | No | `localhost,127.0.0.1` |
+| `CORS_ALLOWED_ORIGINS` | No | `http://localhost:3000` |
+
+### Production (DJANGO_ENV=production)
+
+These settings are **required** and will raise errors if missing:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DJANGO_ENV` | ✅ | Must be `production` |
+| `SECRET_KEY` | ✅ | Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `ALLOWED_HOSTS` | ✅ | Your domain(s), e.g., `your-app.onrender.com` |
+| `DEBUG` | No | Defaults to `False` in production |
+| `CORS_ALLOWED_ORIGINS` | No | Frontend URL(s) |
+| `CSRF_TRUSTED_ORIGINS` | No | Has sensible defaults |
 
 See `.env.example` for full list with descriptions.
 
@@ -139,21 +157,26 @@ See `.env.example` for full list with descriptions.
 | PATCH | `/api/posts/{id}/` | Update post |
 | DELETE | `/api/posts/{id}/` | Delete post |
 | GET | `/api/posts/home/` | Get home feed |
+| POST | `/api/posts/{id}/retweet/` | Retweet a post |
+| GET | `/api/posts/{id}/thread/` | Get post thread |
+| GET | `/api/posts/trending_hashtags/` | Get trending hashtags |
 
 ### Users
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/users/` | List users |
-| GET | `/api/users/{id}/` | Get user profile |
+| GET | `/api/users/{username}/` | Get user profile by username |
 
 ### Follows
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/follows/` | List follows |
-| POST | `/api/follows/` | Follow user |
+| POST | `/api/follows/` | Follow user (`{"following": user_id}`) |
 | DELETE | `/api/follows/{id}/` | Unfollow user |
+| GET | `/api/follows/followers/` | Get your followers |
+| GET | `/api/follows/following/` | Get who you follow |
 
 ### Likes & Bookmarks
 
@@ -190,7 +213,7 @@ pytest tests/test_posts.py
 1. **Create new Web Service** on Render
 2. **Connect GitHub repository**
 3. **Configure**:
-   - Build Command: `pip install -r requirements.txt`
+   - Build Command: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
    - Start Command: `gunicorn backend.wsgi:application`
 4. **Set environment variables** in Render dashboard
 5. **Deploy**
@@ -199,11 +222,11 @@ pytest tests/test_posts.py
 
 Set these in your Render dashboard:
 
-``` bash
+```bash
+DJANGO_ENV=production
 SECRET_KEY=<generated-secret-key>
-DEBUG=False
-ALLOWED_HOSTS=.onrender.com
 DATABASE_URL=<neon-postgres-url>
+ALLOWED_HOSTS=your-app.onrender.com
 CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
 CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://*.onrender.com
 FRONTEND_URL=https://your-frontend.vercel.app
