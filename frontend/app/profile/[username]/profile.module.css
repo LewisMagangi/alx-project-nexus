@@ -1,0 +1,20 @@
+.headerImage {
+  height: 12rem;
+  background: linear-gradient(to right, #3b82f6, #a21caf);
+}
+
+.headerImageCustom {
+  background-size: cover;
+  background-position: center;
+}
+
+.avatar {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 9999px;
+  border-width: 4px;
+  border-color: white;
+  background-color: #e5e7eb;
+  overflow: hidden;
+  position: relative;
+}
