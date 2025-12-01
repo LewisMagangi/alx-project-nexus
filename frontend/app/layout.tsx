@@ -3,30 +3,23 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import Navbar from '@/components/Navbar';
+import AppLayout from '@/components/AppLayout';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Twitter MVP - Social Network',
-  description: 'A minimal Twitter-like social media platform',
+  title: 'Nexus - Connect, Share, Inspire',
+  description: 'A modern social platform where conversations happen, ideas flourish, and communities thrive.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen bg-gray-50 lg:ml-64">
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
-          </main>
+          <AppLayout>
+            {children}
+          </AppLayout>
         </AuthProvider>
       </body>
     </html>
