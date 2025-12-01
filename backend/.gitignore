@@ -87,9 +87,5 @@ Thumbs.db
 # Test results
 /test-results/
 
-# Static and media files
-static/
-media/
-
 # Migration files
 */migrations/__pycache__/

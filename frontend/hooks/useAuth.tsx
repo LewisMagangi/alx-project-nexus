@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   register: (email: string, password: string, username?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -28,15 +28,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setLoading(true);
     try {
-      const response = await loginApi({ email, password });
+      const response = await loginApi({ username, password });
       const userData = response.data.user || response.data;
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      // Store JWT access token
+      if (response.data.access) {
+        localStorage.setItem('token', response.data.access);
+      }
+      if (response.data.refresh) {
+        localStorage.setItem('refreshToken', response.data.refresh);
       }
     } finally {
       setLoading(false);
@@ -46,12 +50,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, username?: string) => {
     setLoading(true);
     try {
-      const response = await registerApi({ email, password, username });
+      const response = await registerApi({ email, password, username, accepted_legal_policies: true });
       const userData = response.data.user || response.data;
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      // Store JWT access token if provided
+      if (response.data.access) {
+        localStorage.setItem('token', response.data.access);
+      }
+      if (response.data.refresh) {
+        localStorage.setItem('refreshToken', response.data.refresh);
       }
     } finally {
       setLoading(false);
@@ -62,10 +70,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await logoutApi();
+    } catch {
+      // Ignore logout errors - we still want to clear local state
     } finally {
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       setLoading(false);
     }
   };

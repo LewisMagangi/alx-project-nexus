@@ -32,7 +32,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY environment variable must be set for production!")
+    raise RuntimeError(
+        "SECRET_KEY environment variable must be set for production!"
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "yes"]
@@ -118,18 +120,17 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-# Database# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databasesdocs.djangoproject.com/en/5.2/ref/settings/#databases
-
 import dj_database_url
 
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     "default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 }
 
 
-# Password validation# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validatorsproject.com/en/5.2/ref/settings/#auth-password-validators
+# Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -147,33 +148,29 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/roject.com/en/5.2/topics/i18n/
+# Internationalization
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
-USE_I18N = TrueUSE_I18N = True
-
-USE_TZ = TrueUSE_TZ = True
+USE_I18N = True
+USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/howto/static-files/
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
-# Default primary key field type# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field/en/5.2/ref/settings/#default-auto-field
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# CORS_ALLOWED_ORIGINS from env, split by comma
 CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(
