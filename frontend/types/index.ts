@@ -18,21 +18,45 @@ export interface Post {
   content: string;
   created_at: string;
 
-  // Ownership
-  user?: UserMini | null;
-  user_id: number;
-  username?: string;
+  // User info - backend returns 'user' as ID and 'user_data' as object
+  user: number;  // User ID from backend
+  user_id?: number;  // Legacy support
+  username: string;
+  user_data?: UserMini;  // Full user object from backend
 
-  // Likes
-  likes_count: number;
+  // Counts
+  likes_count?: number;  // Legacy
+  like_count?: number;   // New backend field
+  reply_count: number;
+  retweet_count: number;
+  quote_count: number;
+  bookmark_count?: number;
+
+  // User interactions
   is_liked?: boolean;
-
-  // Bookmarks
   is_bookmarked?: boolean;
+  is_liked_by_user?: boolean;
+  is_bookmarked_by_user?: boolean;
+  is_retweeted_by_user?: boolean;
 
-  // Replies
-  parent_post?: Post | null;
-  replies_count?: number;
+  // Thread support
+  parent_post?: number | null;
+  root_post?: number | null;
+
+  // Retweet support
+  retweet_of?: number | Post | null;
+  retweet_of_data?: Post | null;
+  is_quote_tweet: boolean;
+  is_retweet: boolean;
+  is_reply: boolean;
+
+  // Rich content
+  hashtags?: Array<{id: number; tag: string}>;
+  mentions?: Array<{id: number; username: string}>;
+  
+  // Metadata
+  updated_at?: string;
+  is_deleted?: boolean;
 }
 
 // ========== BOOKMARK ==========
