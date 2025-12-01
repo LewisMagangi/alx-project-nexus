@@ -479,6 +479,8 @@ paths:
   /api/follows/:
     get:
       operationId: follows_list
+      description: Get all follow relationships for the current user
+      summary: List follows
       parameters:
       - name: limit
         required: false
@@ -505,6 +507,8 @@ paths:
           description: ''
     post:
       operationId: follows_create
+      description: Create a follow relationship
+      summary: Follow a user
       tags:
       - follows
       requestBody:
@@ -531,12 +535,12 @@ paths:
   /api/follows/{id}/:
     get:
       operationId: follows_retrieve
+      description: ViewSet for managing follows
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this follow.
+          type: string
         required: true
       tags:
       - follows
@@ -551,12 +555,12 @@ paths:
           description: ''
     put:
       operationId: follows_update
+      description: ViewSet for managing follows
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this follow.
+          type: string
         required: true
       tags:
       - follows
@@ -583,12 +587,12 @@ paths:
           description: ''
     patch:
       operationId: follows_partial_update
+      description: ViewSet for managing follows
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this follow.
+          type: string
         required: true
       tags:
       - follows
@@ -614,12 +618,13 @@ paths:
           description: ''
     delete:
       operationId: follows_destroy
+      description: Remove a follow relationship
+      summary: Unfollow a user
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this follow.
+          type: string
         required: true
       tags:
       - follows
@@ -628,9 +633,43 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/follows/followers/:
+    get:
+      operationId: follows_followers_retrieve
+      description: Get all users following the current user
+      summary: Get followers
+      tags:
+      - follows
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Follow'
+          description: ''
+  /api/follows/following/:
+    get:
+      operationId: follows_following_retrieve
+      description: Get all users the current user is following
+      summary: Get following
+      tags:
+      - follows
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Follow'
+          description: ''
   /api/likes/:
     get:
       operationId: likes_list
+      description: Get all likes by the current user
+      summary: List likes
       parameters:
       - name: limit
         required: false
@@ -657,6 +696,8 @@ paths:
           description: ''
     post:
       operationId: likes_create
+      description: Create a like on a post
+      summary: Like a post
       tags:
       - likes
       requestBody:
@@ -683,12 +724,12 @@ paths:
   /api/likes/{id}/:
     get:
       operationId: likes_retrieve
+      description: ViewSet for managing likes
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this like.
+          type: string
         required: true
       tags:
       - likes
@@ -703,12 +744,12 @@ paths:
           description: ''
     put:
       operationId: likes_update
+      description: ViewSet for managing likes
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this like.
+          type: string
         required: true
       tags:
       - likes
@@ -735,12 +776,12 @@ paths:
           description: ''
     patch:
       operationId: likes_partial_update
+      description: ViewSet for managing likes
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this like.
+          type: string
         required: true
       tags:
       - likes
@@ -766,12 +807,13 @@ paths:
           description: ''
     delete:
       operationId: likes_destroy
+      description: Remove a like from a post
+      summary: Unlike a post
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
-        description: A unique integer value identifying this like.
+          type: string
         required: true
       tags:
       - likes
@@ -966,25 +1008,48 @@ paths:
   /api/posts/:
     get:
       operationId: posts_list
+      description: Get all posts with optional filtering by hashtag or mention
+      summary: List all posts
       parameters:
+      - in: query
+        name: hashtag
+        schema:
+          type: string
+        description: 'Filter posts by hashtag (without #)'
       - name: limit
         required: false
         in: query
         description: Number of results to return per page.
         schema:
           type: integer
+      - in: query
+        name: mention
+        schema:
+          type: string
+        description: Filter posts mentioning a specific username
       - name: offset
         required: false
         in: query
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       - name: search
         required: false
         in: query
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user_id
+        schema:
+          type: integer
+        description: Filter posts by user ID
       tags:
       - posts
       security:
@@ -998,6 +1063,8 @@ paths:
           description: ''
     post:
       operationId: posts_create
+      description: Create a regular post, reply, or quote tweet
+      summary: Create a new post
       tags:
       - posts
       requestBody:
@@ -1011,7 +1078,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Post'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -1024,6 +1090,8 @@ paths:
   /api/posts/{id}/:
     get:
       operationId: posts_retrieve
+      description: Retrieve a post by its ID
+      summary: Get a single post
       parameters:
       - in: path
         name: id
@@ -1044,6 +1112,8 @@ paths:
           description: ''
     put:
       operationId: posts_update
+      description: Update the content of a post
+      summary: Update a post
       parameters:
       - in: path
         name: id
@@ -1064,7 +1134,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Post'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -1076,6 +1145,8 @@ paths:
           description: ''
     patch:
       operationId: posts_partial_update
+      description: Partially update the content of a post
+      summary: Partially update a post
       parameters:
       - in: path
         name: id
@@ -1107,6 +1178,8 @@ paths:
           description: ''
     delete:
       operationId: posts_destroy
+      description: Soft delete a post
+      summary: Delete a post
       parameters:
       - in: path
         name: id
@@ -1121,9 +1194,42 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/posts/home/:
+  /api/posts/{id}/replies/:
     get:
-      operationId: posts_home_retrieve
+      operationId: posts_replies_list
+      description: Get direct replies to a specific post
+      summary: Get replies to a post
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - posts
       security:
@@ -1133,12 +1239,327 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/PaginatedPostList'
+          description: ''
+  /api/posts/{id}/retweet/:
+    post:
+      operationId: posts_retweet_create
+      description: Create a retweet of an existing post
+      summary: Retweet a post
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Post'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Post'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/Post'
+          description: ''
+        '400':
+          description: Already retweeted
+  /api/posts/{id}/thread/:
+    get:
+      operationId: posts_thread_list
+      description: Get all posts in a thread, starting from the root
+      summary: Get thread
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostList'
+          description: ''
+  /api/posts/{id}/unretweet/:
+    post:
+      operationId: posts_unretweet_create
+      description: Remove a retweet of a post
+      summary: Undo retweet
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Post'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Post'
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Retweet removed
+        '400':
+          description: Not retweeted
+  /api/posts/hashtag/{tag}/:
+    get:
+      operationId: posts_hashtag_list
+      description: Get all posts containing a specific hashtag
+      summary: Get posts by hashtag
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: tag
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostList'
+          description: ''
+  /api/posts/home/:
+    get:
+      operationId: posts_home_list
+      description: Get posts from users the current user follows
+      summary: Get home feed
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostList'
+          description: ''
+  /api/posts/mentions/{username}/:
+    get:
+      operationId: posts_mentions_list
+      description: Get all posts mentioning a specific username
+      summary: Get posts mentioning a user
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostList'
+          description: ''
+  /api/posts/trending_hashtags/:
+    get:
+      operationId: posts_trending_hashtags_list
+      description: Get the top 20 trending hashtags from the last 7 days
+      summary: Get trending hashtags
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTrendingHashtagList'
           description: ''
   /api/posts/user/{user_id}/:
     get:
-      operationId: posts_user_retrieve
+      operationId: posts_user_list
+      description: Get all posts by a specific user
+      summary: Get user posts
       parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       - in: path
         name: user_id
         schema:
@@ -1153,7 +1574,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PaginatedPostList'
           description: ''
   /api/schema/:
     get:
@@ -1354,6 +1775,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPublicUserList'
           description: ''
+  /api/users/{username}/:
+    get:
+      operationId: users_retrieve
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUser'
+          description: ''
 components:
   schemas:
     Account:
@@ -1449,14 +1890,26 @@ components:
       - user
     Follow:
       type: object
+      description: Serializer for follows
       properties:
         id:
           type: integer
           readOnly: true
         follower:
           type: integer
+          readOnly: true
         following:
           type: integer
+        follower_username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
+        following_username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -1464,16 +1917,46 @@ components:
       required:
       - created_at
       - follower
+      - follower_username
       - following
+      - following_username
       - id
+    Hashtag:
+      type: object
+      description: Serializer for hashtag data
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tag:
+          type: string
+          maxLength: 100
+        use_count:
+          type: integer
+          readOnly: true
+        last_used_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - last_used_at
+      - tag
+      - use_count
     Like:
       type: object
+      description: Serializer for likes
       properties:
         id:
           type: integer
           readOnly: true
         user:
           type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
           readOnly: true
         post:
           type: integer
@@ -1486,6 +1969,7 @@ components:
       - id
       - post
       - user
+      - username
     Login:
       type: object
       properties:
@@ -1500,6 +1984,22 @@ components:
       required:
       - password
       - user
+      - username
+    Mention:
+      type: object
+      description: Serializer for mention data
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+        mentioned_user:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - mentioned_user
       - username
     Message:
       type: object
@@ -1796,6 +2296,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SearchResult'
+    PaginatedTrendingHashtagList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrendingHashtag'
     PasswordChange:
       type: object
       properties:
@@ -1827,26 +2350,44 @@ components:
           maxLength: 254
     PatchedFollow:
       type: object
+      description: Serializer for follows
       properties:
         id:
           type: integer
           readOnly: true
         follower:
           type: integer
+          readOnly: true
         following:
           type: integer
+        follower_username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
+        following_username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
         created_at:
           type: string
           format: date-time
           readOnly: true
     PatchedLike:
       type: object
+      description: Serializer for likes
       properties:
         id:
           type: integer
           readOnly: true
         user:
           type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
           readOnly: true
         post:
           type: integer
@@ -1895,6 +2436,12 @@ components:
           writeOnly: true
     PatchedPost:
       type: object
+      description: |-
+        Full post serializer with support for:
+        - Regular posts
+        - Replies and threads
+        - Retweets and quote tweets
+        - Hashtags and mentions
       properties:
         id:
           type: integer
@@ -1907,24 +2454,93 @@ components:
           description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
             only.
           readOnly: true
+        user_data:
+          allOf:
+          - $ref: '#/components/schemas/UserMini'
+          readOnly: true
         content:
           type: string
           maxLength: 280
         parent_post:
           type: integer
           nullable: true
-        replies_count:
+        root_post:
+          type: integer
+          nullable: true
+        retweet_of:
+          type: integer
+          nullable: true
+        retweet_of_data:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+        is_quote_tweet:
+          type: boolean
+        is_retweet:
+          type: string
+          readOnly: true
+        is_reply:
+          type: string
+          readOnly: true
+        reply_count:
           type: integer
           readOnly: true
+        retweet_count:
+          type: integer
+          readOnly: true
+        like_count:
+          type: integer
+          readOnly: true
+        quote_count:
+          type: integer
+          readOnly: true
+        bookmark_count:
+          type: integer
+          readOnly: true
+        hashtags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hashtag'
+          readOnly: true
+        mentions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mention'
+          readOnly: true
+        is_retweeted_by_user:
+          type: boolean
+          readOnly: true
+        is_liked_by_user:
+          type: boolean
+          readOnly: true
+        is_bookmarked_by_user:
+          type: boolean
+          readOnly: true
         created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
           type: string
           format: date-time
           readOnly: true
         is_deleted:
           type: boolean
           readOnly: true
+        quote_of:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: Post ID to quote tweet
     Post:
       type: object
+      description: |-
+        Full post serializer with support for:
+        - Regular posts
+        - Replies and threads
+        - Retweets and quote tweets
+        - Hashtags and mentions
       properties:
         id:
           type: integer
@@ -1937,29 +2553,105 @@ components:
           description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
             only.
           readOnly: true
+        user_data:
+          allOf:
+          - $ref: '#/components/schemas/UserMini'
+          readOnly: true
         content:
           type: string
           maxLength: 280
         parent_post:
           type: integer
           nullable: true
-        replies_count:
+        root_post:
+          type: integer
+          nullable: true
+        retweet_of:
+          type: integer
+          nullable: true
+        retweet_of_data:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+        is_quote_tweet:
+          type: boolean
+        is_retweet:
+          type: string
+          readOnly: true
+        is_reply:
+          type: string
+          readOnly: true
+        reply_count:
           type: integer
           readOnly: true
+        retweet_count:
+          type: integer
+          readOnly: true
+        like_count:
+          type: integer
+          readOnly: true
+        quote_count:
+          type: integer
+          readOnly: true
+        bookmark_count:
+          type: integer
+          readOnly: true
+        hashtags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hashtag'
+          readOnly: true
+        mentions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mention'
+          readOnly: true
+        is_retweeted_by_user:
+          type: boolean
+          readOnly: true
+        is_liked_by_user:
+          type: boolean
+          readOnly: true
+        is_bookmarked_by_user:
+          type: boolean
+          readOnly: true
         created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
           type: string
           format: date-time
           readOnly: true
         is_deleted:
           type: boolean
           readOnly: true
+        quote_of:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: Post ID to quote tweet
       required:
-      - content
+      - bookmark_count
       - created_at
+      - hashtags
       - id
+      - is_bookmarked_by_user
       - is_deleted
-      - replies_count
+      - is_liked_by_user
+      - is_reply
+      - is_retweet
+      - is_retweeted_by_user
+      - like_count
+      - mentions
+      - quote_count
+      - reply_count
+      - retweet_count
+      - retweet_of_data
+      - updated_at
       - user
+      - user_data
       - username
     PublicUser:
       type: object
@@ -2054,10 +2746,80 @@ components:
       required:
       - access
       - refresh
+    TrendingHashtag:
+      type: object
+      description: Serializer for trending hashtag response
+      properties:
+        id:
+          type: integer
+        tag:
+          type: string
+        use_count:
+          type: integer
+        post_count:
+          type: integer
+      required:
+      - id
+      - tag
+      - use_count
+    UserMini:
+      type: object
+      description: Minimal user serializer for nested representations
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+      required:
+      - id
+      - username
     UserProfile:
       type: object
       properties:
         accepted_legal_policies:
+          type: boolean
+        bio:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+          maxLength: 100
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 255
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        header_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        followers_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        following_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        posts_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        is_verified:
           type: boolean
   securitySchemes:
     jwtAuth:
