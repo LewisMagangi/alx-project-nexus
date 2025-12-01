@@ -67,6 +67,7 @@ Pipfile.lock
 # Environments
 .env
 .env.*
+!.env.example
 .venv/
 venv/
 ENV/
@@ -91,7 +92,4 @@ static/
 media/
 
 # Migration files
-migrations/
-./*/migrations/
-*/migrations/__init__.py
-!*/migrations/__init__.py
+*/migrations/__pycache__/
