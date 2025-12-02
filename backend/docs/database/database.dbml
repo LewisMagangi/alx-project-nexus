@@ -45,8 +45,8 @@ Table users {
   is_deleted boolean [default: false]
   
   // Password reset and email verification tokens (stored as SHA-256 hashes)
-  reset_token_hash varchar(64) [default: '', note: 'SHA-256 hash of reset token']
-  email_verification_key_hash varchar(64) [default: '', note: 'SHA-256 hash of verification key']
+  reset_token varchar(64) [default: '', note: 'SHA-256 hash of reset token (not plaintext)']
+  email_verification_key varchar(64) [default: '', note: 'SHA-256 hash of verification key (not plaintext)']
   
   indexes {
     username [unique, name: 'idx_users_username']
@@ -58,8 +58,8 @@ Table users {
   User profile information in 3NF:
   - Each attribute depends only on user.id
   - Counts are denormalized but updated via signals
-  - reset_token_hash and email_verification_key_hash store SHA-256 hashes of tokens
-    to prevent account takeover if database is compromised
+  - reset_token and email_verification_key store SHA-256 hashes of tokens
+    (not plaintext) to prevent account takeover if database is compromised
   '''
 }
 
