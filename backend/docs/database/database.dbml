@@ -44,6 +44,10 @@ Table users {
   is_suspended boolean [default: false]
   is_deleted boolean [default: false]
   
+  // Password reset and email verification tokens
+  reset_token varchar(64) [default: '']
+  email_verification_key varchar(64) [default: '']
+  
   indexes {
     username [unique, name: 'idx_users_username']
     email [unique, name: 'idx_users_email']
@@ -54,6 +58,7 @@ Table users {
   User profile information in 3NF:
   - Each attribute depends only on user.id
   - Counts are denormalized but updated via signals
+  - reset_token and email_verification_key used for auth flows
   '''
 }
 
