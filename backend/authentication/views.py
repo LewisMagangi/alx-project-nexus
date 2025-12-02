@@ -314,22 +314,22 @@ class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = CustomPasswordResetConfirmSerializer
 
     def post(self, request):
-        email = request.data.get("email")
         token = request.data.get("token")
         new_password = request.data.get("new_password")
-        if not (email and token and new_password):
+        if not (token and new_password):
             return Response({"error": "Missing required fields."}, status=400)
+        from users.models import UserProfile
         try:
-            user = User.objects.get(email=email)
-            if user.profile.reset_token != token:
-                return Response({"error": "Invalid token."}, status=400)
+            profile = UserProfile.objects.get(reset_token=token)
+            user = profile.user
             user.set_password(new_password)
-            user.profile.reset_token = ""
-            user.profile.save()
+            profile.reset_token = ""
+            profile.save()
             user.save()
             return Response({"detail": "Password reset successful."})
-        except User.DoesNotExist:
-            return Response({"error": "Invalid email or token."}, status=400)
+        except UserProfile.DoesNotExist:
+            # Do not reveal whether the token is valid
+            return Response({"error": "Invalid token."}, status=400)
 
 
 # Email Verification
