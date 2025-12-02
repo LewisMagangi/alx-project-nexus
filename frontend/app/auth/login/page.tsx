@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,8 @@ import { CheckCircle2 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export default function LoginPage() {
+
+function LoginContent() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,7 +22,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
 
-  // Check if redirected after email verification
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
       setShowVerifiedMessage(true);
@@ -46,7 +46,6 @@ export default function LoginPage() {
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     try {
-      // Fetch auth URL from backend and redirect
       const response = await fetch(`${API_BASE_URL}/api/auth/social/${provider}/login/`);
       const data = await response.json();
       if (data.auth_url) {
@@ -192,5 +191,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }

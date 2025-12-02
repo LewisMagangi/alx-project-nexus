@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,8 @@ import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export default function GoogleCallbackPage() {
+
+function GoogleCallbackContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Completing Google sign-in...');
   const router = useRouter();
@@ -18,7 +19,6 @@ export default function GoogleCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Prevent double execution (React StrictMode)
       if (hasProcessed.current) return;
       hasProcessed.current = true;
 
@@ -54,7 +54,6 @@ export default function GoogleCallbackPage() {
           throw new Error(data.error || 'Failed to complete Google sign-in.');
         }
 
-        // Store tokens and user data
         if (data.access && data.refresh && data.user) {
           setAuthData(data.access, data.refresh, data.user);
           setStatus('success');
@@ -91,5 +90,13 @@ export default function GoogleCallbackPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }

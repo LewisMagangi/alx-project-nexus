@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,8 @@ import Link from 'next/link';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export default function PasswordResetConfirmPage() {
+
+function PasswordResetConfirmContent() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -187,5 +188,13 @@ export default function PasswordResetConfirmPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PasswordResetConfirmPage() {
+  return (
+    <Suspense>
+      <PasswordResetConfirmContent />
+    </Suspense>
   );
 }
