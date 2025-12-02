@@ -24,13 +24,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
         required: true
       security:
       - jwtAuth: []
@@ -39,7 +39,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PasswordChange'
+                $ref: '#/components/schemas/CustomPasswordChange'
           description: ''
     put:
       operationId: account_password_update
@@ -50,13 +50,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PasswordChange'
+              $ref: '#/components/schemas/CustomPasswordChange'
         required: true
       security:
       - jwtAuth: []
@@ -65,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PasswordChange'
+                $ref: '#/components/schemas/CustomPasswordChange'
           description: ''
     patch:
       operationId: account_password_partial_update
@@ -76,13 +76,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedPasswordChange'
+              $ref: '#/components/schemas/PatchedCustomPasswordChange'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedPasswordChange'
+              $ref: '#/components/schemas/PatchedCustomPasswordChange'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedPasswordChange'
+              $ref: '#/components/schemas/PatchedCustomPasswordChange'
       security:
       - jwtAuth: []
       responses:
@@ -90,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PasswordChange'
+                $ref: '#/components/schemas/CustomPasswordChange'
           description: ''
   /api/account/update/:
     put:
@@ -207,6 +207,239 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/CustomLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomLogin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomLogin'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: ''
+  /api/auth/password/reset/:
+    post:
+      operationId: auth_password_reset_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetRequest'
+          description: ''
+  /api/auth/password/reset/confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomPasswordResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomPasswordResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomPasswordResetConfirm'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPasswordResetConfirm'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomRegister'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomRegister'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomRegister'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomRegister'
+          description: ''
+  /api/auth/resend-verification/:
+    post:
+      operationId: auth_resend_verification_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendVerification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendVerification'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendVerification'
+          description: ''
+  /api/auth/social/github/callback/:
+    post:
+      operationId: auth_social_github_callback_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: ''
+  /api/auth/social/github/login/:
+    get:
+      operationId: auth_social_github_login_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_url:
+                    type: string
+          description: ''
+  /api/auth/social/google/callback/:
+    post:
+      operationId: auth_social_google_callback_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SocialAuthCode'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: ''
+  /api/auth/social/google/login/:
+    get:
+      operationId: auth_social_google_login_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_url:
+                    type: string
+          description: ''
+  /api/auth/social/login/:
+    post:
+      operationId: auth_social_login_create
+      description: |-
+        Check the credentials and return the REST Token
+        if the credentials are valid and authenticated.
+        Calls Django Auth login method to register User ID
+        in Django session framework
+
+        Accept the following POST parameters: username, password
+        Return the REST Framework Token Object's key.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
               $ref: '#/components/schemas/Login'
           application/x-www-form-urlencoded:
             schema:
@@ -223,11 +456,128 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/Token'
           description: ''
-  /api/auth/register/:
+  /api/auth/social/logout/:
     post:
-      operationId: auth_register_create
+      operationId: auth_social_logout_create
+      description: |-
+        Calls Django logout method and delete the Token object
+        assigned to the current User object.
+
+        Accepts/Returns nothing.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/password/change/:
+    post:
+      operationId: auth_social_password_change_create
+      description: |-
+        Calls Django Auth SetPasswordForm save method.
+
+        Accepts the following POST parameters: new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/password/reset/:
+    post:
+      operationId: auth_social_password_reset_create
+      description: |-
+        Calls Django Auth PasswordResetForm save method.
+
+        Accepts the following POST parameters: email
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/password/reset/confirm/:
+    post:
+      operationId: auth_social_password_reset_confirm_create
+      description: |-
+        Password reset e-mail link is confirmed, therefore
+        this resets the user's password.
+
+        Accepts the following POST parameters: token, uid,
+            new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/registration/:
+    post:
+      operationId: auth_social_registration_create
       tags:
       - auth
       requestBody:
@@ -250,7 +600,202 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Register'
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/registration/resend-email/:
+    post:
+      operationId: auth_social_registration_resend_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/registration/verify-email/:
+    post:
+      operationId: auth_social_registration_verify_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/social/user/:
+    get:
+      operationId: auth_social_user_retrieve
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    put:
+      operationId: auth_social_user_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    patch:
+      operationId: auth_social_user_partial_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+  /api/auth/verification-status/:
+    get:
+      operationId: auth_verification_status_retrieve
+      parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_verified:
+                    type: boolean
+          description: ''
+  /api/auth/verify-email/:
+    post:
+      operationId: auth_verify_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailVerification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailVerification'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailVerification'
           description: ''
   /api/bookmarks/:
     get:
@@ -535,12 +1080,13 @@ paths:
   /api/follows/{id}/:
     get:
       operationId: follows_retrieve
-      description: ViewSet for managing follows
+      description: Get a specific follow relationship by ID
+      summary: Get a follow
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - follows
@@ -555,12 +1101,13 @@ paths:
           description: ''
     put:
       operationId: follows_update
-      description: ViewSet for managing follows
+      description: Update a specific follow relationship
+      summary: Update a follow
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - follows
@@ -587,12 +1134,13 @@ paths:
           description: ''
     patch:
       operationId: follows_partial_update
-      description: ViewSet for managing follows
+      description: Partially update a specific follow relationship
+      summary: Partial update a follow
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - follows
@@ -624,7 +1172,7 @@ paths:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - follows
@@ -724,12 +1272,13 @@ paths:
   /api/likes/{id}/:
     get:
       operationId: likes_retrieve
-      description: ViewSet for managing likes
+      description: Get a specific like by ID
+      summary: Get a like
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - likes
@@ -744,12 +1293,13 @@ paths:
           description: ''
     put:
       operationId: likes_update
-      description: ViewSet for managing likes
+      description: Update a specific like
+      summary: Update a like
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - likes
@@ -776,12 +1326,13 @@ paths:
           description: ''
     patch:
       operationId: likes_partial_update
-      description: ViewSet for managing likes
+      description: Partially update a specific like
+      summary: Partial update a like
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - likes
@@ -813,7 +1364,7 @@ paths:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - likes
@@ -1817,6 +2368,21 @@ components:
       required:
       - id
       - username
+    AuthResponse:
+      type: object
+      description: Serializer for authentication response with JWT tokens.
+      properties:
+        refresh:
+          type: string
+        access:
+          type: string
+        user:
+          type: object
+          additionalProperties: {}
+      required:
+      - access
+      - refresh
+      - user
     Bookmark:
       type: object
       description: |-
@@ -1827,7 +2393,9 @@ components:
           type: integer
           readOnly: true
         post:
-          type: string
+          type: object
+          additionalProperties: {}
+          description: Return nested PostSerializer response.
           readOnly: true
         post_id:
           type: integer
@@ -1888,6 +2456,86 @@ components:
       - created_at
       - id
       - user
+    CustomLogin:
+      type: object
+      description: Custom login serializer supporting username or email authentication.
+      properties:
+        username:
+          type: string
+          description: Username or email address
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    CustomPasswordChange:
+      type: object
+      description: Custom serializer for password change to avoid name clash with
+        dj-rest-auth.
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+        new_password:
+          type: string
+          writeOnly: true
+      required:
+      - new_password
+      - old_password
+    CustomPasswordResetConfirm:
+      type: object
+      description: Serializer for password reset confirmation.
+      properties:
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+        new_password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - new_password
+      - token
+    CustomRegister:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        accepted_legal_policies:
+          type: boolean
+          writeOnly: true
+      required:
+      - accepted_legal_policies
+      - password
+      - username
+    EmailVerification:
+      type: object
+      description: Serializer for email verification.
+      properties:
+        email:
+          type: string
+          format: email
+        key:
+          type: string
+      required:
+      - email
+      - key
     Follow:
       type: object
       description: Serializer for follows
@@ -1975,16 +2623,13 @@ components:
       properties:
         username:
           type: string
+        email:
+          type: string
+          format: email
         password:
           type: string
-          writeOnly: true
-        user:
-          type: string
-          readOnly: true
       required:
       - password
-      - user
-      - username
     Mention:
       type: object
       description: Serializer for mention data
@@ -2322,15 +2967,52 @@ components:
     PasswordChange:
       type: object
       properties:
-        old_password:
+        new_password1:
           type: string
-          writeOnly: true
-        new_password:
+          maxLength: 128
+        new_password2:
           type: string
-          writeOnly: true
+          maxLength: 128
       required:
-      - new_password
-      - old_password
+      - new_password1
+      - new_password2
+    PasswordReset:
+      type: object
+      description: Serializer for requesting a password reset e-mail.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    PasswordResetConfirm:
+      type: object
+      description: Serializer for confirming a password reset attempt.
+      properties:
+        new_password1:
+          type: string
+          maxLength: 128
+        new_password2:
+          type: string
+          maxLength: 128
+        uid:
+          type: string
+        token:
+          type: string
+      required:
+      - new_password1
+      - new_password2
+      - token
+      - uid
+    PasswordResetRequest:
+      type: object
+      description: Serializer for password reset request.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
     PatchedAccount:
       type: object
       properties:
@@ -2348,6 +3030,17 @@ components:
           format: email
           title: Email address
           maxLength: 254
+    PatchedCustomPasswordChange:
+      type: object
+      description: Custom serializer for password change to avoid name clash with
+        dj-rest-auth.
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+        new_password:
+          type: string
+          writeOnly: true
     PatchedFollow:
       type: object
       description: Serializer for follows
@@ -2425,15 +3118,6 @@ components:
           type: string
           format: date-time
           readOnly: true
-    PatchedPasswordChange:
-      type: object
-      properties:
-        old_password:
-          type: string
-          writeOnly: true
-        new_password:
-          type: string
-          writeOnly: true
     PatchedPost:
       type: object
       description: |-
@@ -2477,12 +3161,6 @@ components:
           readOnly: true
         is_quote_tweet:
           type: boolean
-        is_retweet:
-          type: string
-          readOnly: true
-        is_reply:
-          type: string
-          readOnly: true
         reply_count:
           type: integer
           readOnly: true
@@ -2533,6 +3211,31 @@ components:
           writeOnly: true
           nullable: true
           description: Post ID to quote tweet
+    PatchedUserDetails:
+      type: object
+      description: User model w/o password
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
     Post:
       type: object
       description: |-
@@ -2576,12 +3279,6 @@ components:
           readOnly: true
         is_quote_tweet:
           type: boolean
-        is_retweet:
-          type: string
-          readOnly: true
-        is_reply:
-          type: string
-          readOnly: true
         reply_count:
           type: integer
           readOnly: true
@@ -2640,8 +3337,6 @@ components:
       - is_bookmarked_by_user
       - is_deleted
       - is_liked_by_user
-      - is_reply
-      - is_retweet
       - is_retweeted_by_user
       - like_count
       - mentions
@@ -2678,26 +3373,47 @@ components:
       properties:
         username:
           type: string
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
-          pattern: ^[\w.@+-]+$
           maxLength: 150
+          minLength: 1
         email:
           type: string
           format: email
-          title: Email address
-          maxLength: 254
-        password:
+        password1:
           type: string
           writeOnly: true
-          maxLength: 128
-        accepted_legal_policies:
-          type: boolean
+        password2:
+          type: string
           writeOnly: true
       required:
-      - accepted_legal_policies
-      - password
+      - email
+      - password1
+      - password2
       - username
+    ResendEmailVerification:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    ResendVerification:
+      type: object
+      description: Serializer for resending verification email.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    RestAuthDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
     SearchResult:
       type: object
       properties:
@@ -2714,6 +3430,23 @@ components:
       required:
       - posts
       - users
+    SocialAuthCode:
+      type: object
+      description: Serializer for social auth callback code.
+      properties:
+        code:
+          type: string
+      required:
+      - code
+    Token:
+      type: object
+      description: Serializer for Token model.
+      properties:
+        key:
+          type: string
+          maxLength: 40
+      required:
+      - key
     TokenObtainPair:
       type: object
       properties:
@@ -2762,6 +3495,35 @@ components:
       - id
       - tag
       - use_count
+    UserDetails:
+      type: object
+      description: User model w/o password
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - email
+      - pk
+      - username
     UserMini:
       type: object
       description: Minimal user serializer for nested representations
@@ -2821,6 +3583,14 @@ components:
           format: int64
         is_verified:
           type: boolean
+    VerifyEmail:
+      type: object
+      properties:
+        key:
+          type: string
+          writeOnly: true
+      required:
+      - key
   securitySchemes:
     jwtAuth:
       type: http

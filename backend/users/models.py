@@ -25,6 +25,10 @@ class UserProfile(models.Model):
     
     # Account status
     is_verified = models.BooleanField(default=False)
+    
+    # Password reset and email verification tokens
+    reset_token = models.CharField(max_length=64, blank=True, default="")
+    email_verification_key = models.CharField(max_length=64, blank=True, default="")
 
     def __str__(self):
         return f"Profile for {self.user.username}"

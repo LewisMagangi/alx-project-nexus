@@ -15,6 +15,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# Load frontend URL from environment
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -86,9 +89,18 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party
     "rest_framework",
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "drf_spectacular",
     "corsheaders",
+    # Social Auth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
     # Local
     "users",
     "posts",
@@ -101,11 +113,39 @@ INSTALLED_APPS = [
     "usermessages",
     "communities",
     "legal",
-    "account",
     "hashtags",
     "blocks",
     "reports",
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": "",
+        },
+    },
+    "github": {
+        "SCOPE": ["user", "user:email"],
+    },
+}
+
+# OAuth Redirect URLs (update for production)
+SITE_ID = 1
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+
+# These should match your deployment URLs
+SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL = os.getenv("GOOGLE_REDIRECT_URI")
+SOCIAL_AUTH_GITHUB_CALLBACK_URL = os.getenv("GITHUB_REDIRECT_URI")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -129,6 +169,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -302,13 +343,21 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO" if IS_PRODUCTION else "DEBUG",
+        "level": "INFO" if IS_PRODUCTION else "WARNING",
     },
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": "INFO" if IS_PRODUCTION else "DEBUG",
+            "level": "INFO" if IS_PRODUCTION else "WARNING",
+            "propagate": False,
+        },
+        "django.utils.autoreload": {
+            "handlers": ["console"],
+            "level": "ERROR",
             "propagate": False,
         },
     },
 }
+
+# Email backend for development/testing
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

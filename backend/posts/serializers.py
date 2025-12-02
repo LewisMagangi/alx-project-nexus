@@ -6,6 +6,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.db.models import F
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -81,8 +82,6 @@ class PostSerializer(serializers.ModelSerializer):
             "retweet_of",
             "retweet_of_data",
             "is_quote_tweet",
-            "is_retweet",
-            "is_reply",
             "reply_count",
             "retweet_count",
             "like_count",
@@ -100,8 +99,6 @@ class PostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "user",
-            "is_retweet",
-            "is_reply",
             "reply_count",
             "retweet_count",
             "like_count",
