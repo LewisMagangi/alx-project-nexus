@@ -18,6 +18,7 @@ interface AuthContextType {
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
+  setAuthData: (access: string, refresh: string, userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,14 +108,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(null);
       router.push('/auth/login');
     }
   };
 
+  // Set auth data from social login
+  const setAuthData = (access: string, refresh: string, userData: User) => {
+    localStorage.setItem('token', access);
+    localStorage.setItem('refreshToken', refresh);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser, setAuthData }}>
       {children}
     </AuthContext.Provider>
   );
