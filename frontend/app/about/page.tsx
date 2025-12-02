@@ -49,8 +49,8 @@ export default function AboutPage() {
       image: 'LM',
       links: {
         github: 'https://github.com/LewisMagangi',
-        linkedin: 'https://linkedin.com/in/lewismagangi',
-        twitter: 'https://twitter.com/lewismagangi',
+        linkedin: 'https://www.linkedin.com/in/lewis-magangi/',
+        twitter: 'https://x.com/Lewis_Magangi',
       },
     },
   ];
