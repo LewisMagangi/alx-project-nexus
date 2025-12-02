@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.db.models import Count, F
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -297,6 +298,7 @@ class PostViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Get user posts",
         description="Get all posts by a specific user",
+        parameters=[OpenApiParameter(name="user_id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
         responses={200: PostSerializer(many=True)},
     )
     @action(detail=False, methods=["get"], url_path="user/(?P<user_id>[^/.]+)")
@@ -317,6 +319,7 @@ class PostViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Get posts by hashtag",
         description="Get all posts containing a specific hashtag",
+        parameters=[OpenApiParameter(name="tag", type=OpenApiTypes.STR, location=OpenApiParameter.PATH)],
         responses={200: PostSerializer(many=True)},
     )
     @action(detail=False, methods=["get"], url_path="hashtag/(?P<tag>[^/.]+)")
@@ -339,6 +342,7 @@ class PostViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Get posts mentioning a user",
         description="Get all posts mentioning a specific username",
+        parameters=[OpenApiParameter(name="username", type=OpenApiTypes.STR, location=OpenApiParameter.PATH)],
         responses={200: PostSerializer(many=True)},
     )
     @action(
@@ -370,9 +374,25 @@ class PostViewSet(viewsets.ModelViewSet):
         summary="Like a post",
         description="Create a like on a post",
     ),
+    retrieve=extend_schema(
+        summary="Get a like",
+        description="Get a specific like by ID",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
+    update=extend_schema(
+        summary="Update a like",
+        description="Update a specific like",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
+    partial_update=extend_schema(
+        summary="Partial update a like",
+        description="Partially update a specific like",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
     destroy=extend_schema(
         summary="Unlike a post",
         description="Remove a like from a post",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
     ),
 )
 class LikeViewSet(viewsets.ModelViewSet):
@@ -417,9 +437,25 @@ class LikeViewSet(viewsets.ModelViewSet):
         summary="Follow a user",
         description="Create a follow relationship",
     ),
+    retrieve=extend_schema(
+        summary="Get a follow",
+        description="Get a specific follow relationship by ID",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
+    update=extend_schema(
+        summary="Update a follow",
+        description="Update a specific follow relationship",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
+    partial_update=extend_schema(
+        summary="Partial update a follow",
+        description="Partially update a specific follow relationship",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
+    ),
     destroy=extend_schema(
         summary="Unfollow a user",
         description="Remove a follow relationship",
+        parameters=[OpenApiParameter(name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH)],
     ),
 )
 class FollowViewSet(viewsets.ModelViewSet):

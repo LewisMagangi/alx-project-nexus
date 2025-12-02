@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .serializers import (
     AccountSerializer,
     EmptySerializer,
-    PasswordChangeSerializer,
+    CustomPasswordChangeSerializer,
 )
 
 
@@ -21,7 +21,7 @@ class AccountUpdateView(generics.UpdateAPIView):
 class PasswordChangeView(generics.UpdateAPIView):
     """Change password"""
 
-    serializer_class = PasswordChangeSerializer
+    serializer_class = CustomPasswordChangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):

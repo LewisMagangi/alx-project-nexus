@@ -1,3 +1,4 @@
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from posts.models import Post
 from rest_framework import serializers
@@ -23,8 +24,8 @@ class BookmarkSerializer(serializers.ModelSerializer):
     # Post serializer
     # -----------------------------------
 
-    @extend_schema_field("posts.PostSerializer")
-    def get_post(self, obj):
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_post(self, obj) -> dict:
         """Return nested PostSerializer response."""
         from posts.serializers import (  # lazy import to avoid circular import
             PostSerializer,

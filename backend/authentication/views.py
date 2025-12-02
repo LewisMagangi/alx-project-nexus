@@ -3,8 +3,18 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.serializers import UserSerializer
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from .serializers import LoginSerializer, RegisterSerializer
+from .serializers import (
+    CustomLoginSerializer,
+    CustomRegisterSerializer,
+    PasswordResetRequestSerializer,
+    CustomPasswordResetConfirmSerializer,
+    EmailVerificationSerializer,
+    ResendVerificationSerializer,
+    SocialAuthCodeSerializer,
+    AuthResponseSerializer,
+)
 
 from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
@@ -24,8 +34,9 @@ import requests
 import os
 
 
+@extend_schema(tags=["auth"])
 class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
+    serializer_class = CustomRegisterSerializer
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
@@ -36,8 +47,9 @@ class RegisterView(generics.CreateAPIView):
         UserProfile.objects.create(user=user, accepted_legal_policies=True)
 
 
+@extend_schema(tags=["auth"], responses={200: AuthResponseSerializer})
 class LoginView(generics.GenericAPIView):
-    serializer_class = LoginSerializer
+    serializer_class = CustomLoginSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -54,8 +66,10 @@ class LoginView(generics.GenericAPIView):
 
 
 # Social OAuth login initiation views
-class GoogleLoginInitView(APIView):
+@extend_schema(tags=["auth"], responses={200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}})
+class GoogleLoginInitView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None  # No request body needed for GET
 
     def get(self, request):
         base_url = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -74,8 +88,10 @@ class GoogleLoginInitView(APIView):
         return Response({"auth_url": url})
 
 
-class GitHubLoginInitView(APIView):
+@extend_schema(tags=["auth"], responses={200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}})
+class GitHubLoginInitView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None  # No request body needed for GET
 
     def get(self, request):
         base_url = "https://github.com/login/oauth/authorize"
@@ -91,8 +107,10 @@ class GitHubLoginInitView(APIView):
 
 
 # Social OAuth callback - exchange code for JWT
-class GoogleCallbackView(APIView):
+@extend_schema(tags=["auth"], request=SocialAuthCodeSerializer, responses={200: AuthResponseSerializer})
+class GoogleCallbackView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = SocialAuthCodeSerializer
 
     def post(self, request):
         code = request.data.get("code")
@@ -170,8 +188,10 @@ class GoogleCallbackView(APIView):
             return Response({"error": f"Failed to communicate with Google: {str(e)}"}, status=500)
 
 
-class GitHubCallbackView(APIView):
+@extend_schema(tags=["auth"], request=SocialAuthCodeSerializer, responses={200: AuthResponseSerializer})
+class GitHubCallbackView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = SocialAuthCodeSerializer
 
     def post(self, request):
         code = request.data.get("code")
@@ -260,8 +280,10 @@ class GitHubCallbackView(APIView):
 
 
 # Password Reset Request
-class PasswordResetRequestView(APIView):
+@extend_schema(tags=["auth"], request=PasswordResetRequestSerializer)
+class PasswordResetRequestView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = PasswordResetRequestSerializer
 
     def post(self, request):
         email = request.data.get("email")
@@ -286,8 +308,10 @@ class PasswordResetRequestView(APIView):
 
 
 # Password Reset Confirm
-class PasswordResetConfirmView(APIView):
+@extend_schema(tags=["auth"], request=CustomPasswordResetConfirmSerializer)
+class PasswordResetConfirmView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = CustomPasswordResetConfirmSerializer
 
     def post(self, request):
         email = request.data.get("email")
@@ -309,8 +333,10 @@ class PasswordResetConfirmView(APIView):
 
 
 # Email Verification
-class EmailVerificationView(APIView):
+@extend_schema(tags=["auth"], request=EmailVerificationSerializer)
+class EmailVerificationView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = EmailVerificationSerializer
 
     def post(self, request):
         email = request.data.get("email")
@@ -330,8 +356,10 @@ class EmailVerificationView(APIView):
 
 
 # Resend Verification Email
-class ResendVerificationEmailView(APIView):
+@extend_schema(tags=["auth"], request=ResendVerificationSerializer)
+class ResendVerificationEmailView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = ResendVerificationSerializer
 
     def post(self, request):
         email = request.data.get("email")
@@ -357,8 +385,14 @@ class ResendVerificationEmailView(APIView):
 
 
 # Verification Status
-class EmailVerificationStatusView(APIView):
+@extend_schema(
+    tags=["auth"],
+    parameters=[OpenApiParameter(name="email", type=str, required=True)],
+    responses={200: {"type": "object", "properties": {"is_verified": {"type": "boolean"}}}}
+)
+class EmailVerificationStatusView(generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = None  # GET request with query param
 
     def get(self, request):
         email = request.query_params.get("email")
