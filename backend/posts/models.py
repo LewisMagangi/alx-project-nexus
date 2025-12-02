@@ -137,7 +137,8 @@ class Hashtag(models.Model):
     @classmethod
     def normalize_tag(cls, tag):
         """Normalize hashtag (lowercase, remove #, strip whitespace)"""
-        return tag.lower().lstrip("#").strip()
+        # First strip whitespace, then remove leading #, then strip again, then lowercase
+        return tag.strip().lstrip("#").strip().lower()
 
     @classmethod
     def extract_from_content(cls, content):
