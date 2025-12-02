@@ -84,26 +84,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Auth Navigation - Only show when not logged in */}
-      {!user && (
-        <div className="fixed top-16 left-0 right-0 z-10 bg-white/70 backdrop-blur-md border-b border-white/20 shadow-sm px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-end">
-          <div className="flex items-center gap-4">
-            <Link href="/about">
-              <Button variant="ghost" className="hidden sm:inline-flex text-sm">
-                About Us
-              </Button>
-            </Link>
-            <Link href="/auth/login">
-              <Button variant="ghost" className="text-sm">Sign In</Button>
-            </Link>
-            <Link href="/auth/register">
-              <Button className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg text-sm">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
