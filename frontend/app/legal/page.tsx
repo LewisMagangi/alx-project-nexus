@@ -42,10 +42,10 @@ export default function LegalPage() {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/login">
+              <Link href="/auth/login">
                 <Button variant="ghost">Sign In</Button>
               </Link>
-              <Link href="/register">
+              <Link href="/auth/register">
                 <Button className="bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:opacity-90">
                   Get Started
                 </Button>
@@ -103,12 +103,12 @@ export default function LegalPage() {
               carefully before proceeding.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/register">
+              <Link href="/auth/register">
                 <Button className="w-full sm:w-auto bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:opacity-90">
                   Create Account
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/auth/login">
                 <Button variant="outline" className="w-full sm:w-auto">
                   Sign In
                 </Button>
