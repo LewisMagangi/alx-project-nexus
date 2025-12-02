@@ -78,6 +78,33 @@ class LoginView(generics.GenericAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["auth"],
+    responses={
+        200: {"type": "object", "properties": {"detail": {"type": "string"}}}
+    },
+)
+class LogoutView(generics.GenericAPIView):
+    """
+    Logout endpoint that blacklists the refresh token.
+    For JWT auth, this invalidates the refresh token so it can't be used to get new access tokens.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = None
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+        except Exception:
+            # Even if token is invalid or missing, we return success
+            # The client will clear their local storage anyway
+            return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+
+
 # Social OAuth login initiation views
 @extend_schema(
     tags=["auth"],

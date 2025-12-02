@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 
 from .views import (
     LoginView,
+    LogoutView,
     RegisterView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
@@ -25,6 +26,7 @@ urlpatterns = [
     # Original endpoints
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("jwt/create/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("jwt/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Password reset
