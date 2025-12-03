@@ -361,4 +361,7 @@ LOGGING = {
 }
 
 # Email backend for development/testing
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if IS_DEVELOPMENT else "django.core.mail.backends.smtp.EmailBackend"
+)
