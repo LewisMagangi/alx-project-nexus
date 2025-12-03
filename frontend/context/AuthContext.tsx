@@ -14,6 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  loggingOut: boolean;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -102,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    setLoggingOut(true); // Prevent ProtectedRoute from redirecting
     try {
       authAPI.logout().catch(() => {
         // Ignore errors, logout locally anyway
@@ -124,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser, setAuthData }}>
+    <AuthContext.Provider value={{ user, loading, loggingOut, login, register, logout, setUser, setAuthData }}>
       {children}
     </AuthContext.Provider>
   );

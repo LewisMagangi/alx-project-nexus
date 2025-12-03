@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, loggingOut } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Don't redirect to login if user is logging out (they'll be redirected to home)
+    if (!loading && !user && !loggingOut) {
       router.push('/auth/login');
     }
-  }, [user, loading, router]);
+  }, [user, loading, loggingOut, router]);
 
   if (loading) {
     return (

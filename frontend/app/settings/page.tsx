@@ -120,8 +120,7 @@ function SettingsContent() {
     setLoading(true);
     try {
       await accountAPI.deactivate();
-      logout();
-      router.push('/auth/login');
+      logout(); // logout() already redirects to home page
     } catch (err: unknown) {
       const message =
         typeof err === 'string'
