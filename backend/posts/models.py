@@ -7,6 +7,7 @@ Posts models with support for:
 - Hashtags
 - Mentions
 """
+
 import re
 
 from django.contrib.auth.models import User
@@ -25,9 +26,8 @@ class Post(models.Model):
     - Retweets (retweet_of set, no content)
     - Quote tweets (retweet_of set + content)
     """
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="posts"
-    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     content = models.CharField(max_length=280, blank=True, default="")
 
     # Reply/Thread support
@@ -116,6 +116,7 @@ class Post(models.Model):
 
 class Hashtag(models.Model):
     """Normalized hashtag storage for 3NF compliance"""
+
     tag = models.CharField(max_length=100, unique=True, db_index=True)
 
     # Trending support (denormalized)
@@ -149,6 +150,7 @@ class Hashtag(models.Model):
 
 class PostHashtag(models.Model):
     """Many-to-many relationship between posts and hashtags (3NF)"""
+
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="post_hashtags"
     )
@@ -170,9 +172,8 @@ class PostHashtag(models.Model):
 
 class Mention(models.Model):
     """User mentions in posts (@username) - 3NF compliant"""
-    post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="mentions"
-    )
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="mentions")
     mentioned_user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="mentioned_in"
     )
@@ -205,12 +206,9 @@ class Mention(models.Model):
 
 class Like(models.Model):
     """User likes on posts"""
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="likes"
-    )
-    post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="likes"
-    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -226,6 +224,7 @@ class Like(models.Model):
 
 class Follow(models.Model):
     """User follow relationships"""
+
     follower = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="following"
     )
@@ -249,6 +248,7 @@ class Follow(models.Model):
 # =============================================================================
 # SIGNALS FOR DENORMALIZED COUNT UPDATES
 # =============================================================================
+
 
 @receiver(post_save, sender=Post)
 def update_reply_count_on_create(sender, instance, created, **kwargs):
@@ -300,14 +300,10 @@ def update_retweet_quote_count_on_delete(sender, instance, **kwargs):
 def update_like_count_on_create(sender, instance, created, **kwargs):
     """Update post's like_count when a like is created"""
     if created:
-        Post.objects.filter(pk=instance.post_id).update(
-            like_count=F("like_count") + 1
-        )
+        Post.objects.filter(pk=instance.post_id).update(like_count=F("like_count") + 1)
 
 
 @receiver(post_delete, sender=Like)
 def update_like_count_on_delete(sender, instance, **kwargs):
     """Update post's like_count when a like is deleted"""
-    Post.objects.filter(pk=instance.post_id).update(
-        like_count=F("like_count") - 1
-    )
+    Post.objects.filter(pk=instance.post_id).update(like_count=F("like_count") - 1)
