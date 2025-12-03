@@ -225,6 +225,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
           description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: |-
+        Logout endpoint that blacklists the refresh token.
+        For JWT auth, this invalidates the refresh token so it can't be used to get new access tokens.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+          description: ''
   /api/auth/password/reset/:
     post:
       operationId: auth_password_reset_create
