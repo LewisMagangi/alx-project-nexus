@@ -374,7 +374,7 @@ export default function PostCard({
               <div className="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
                   <Quote className="h-4 w-4 text-green-500" />
-                  <div className="w-6 h-6 rounded-full bg-linear-to-br from-green-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">
                     {quotedUsername?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <span className="font-semibold text-sm">
