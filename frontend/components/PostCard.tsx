@@ -361,24 +361,37 @@ export default function PostCard({
         )}
 
         {/* Quoted post (for quote tweets) */}
-        {post.is_quote_tweet && typeof post.retweet_of === 'object' && post.retweet_of !== null && (
-          <div className="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">
-                {post.retweet_of.username?.[0]?.toUpperCase() ?? '?'}
+        {post.is_quote_tweet && (() => {
+          // Get the quoted post data from either retweet_of or retweet_of_data
+          const quotedPost = post.retweet_of_data || (typeof post.retweet_of === 'object' ? post.retweet_of : null);
+          if (!quotedPost) return null;
+          
+          const quotedUsername = quotedPost.username || 
+            (typeof quotedPost.user === 'object' && quotedPost.user ? quotedPost.user.username : 'unknown');
+          
+          return (
+            <Link href={`/post/${quotedPost.id}`} className="block">
+              <div className="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                <div className="flex items-center gap-2 mb-2">
+                  <Quote className="h-4 w-4 text-green-500" />
+                  <div className="w-6 h-6 rounded-full bg-linear-to-br from-green-500 to-teal-500 flex items-center justify-center text-white text-xs font-semibold">
+                    {quotedUsername?.[0]?.toUpperCase() ?? '?'}
+                  </div>
+                  <span className="font-semibold text-sm">
+                    @{quotedUsername}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {formatDistanceToNow(quotedPost.created_at)}
+                  </span>
+                </div>
+                {/* Use plain text to avoid nested <a> tags inside the Link */}
+                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                  {quotedPost.content ?? ''}
+                </p>
               </div>
-              <Link href={`/profile/${post.retweet_of.username}`} className="font-semibold text-sm hover:underline">
-                @{post.retweet_of.username}
-              </Link>
-              <span className="text-xs text-gray-500">
-                {formatDistanceToNow(post.retweet_of.created_at)}
-              </span>
-            </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              {renderContentWithLinks(post.retweet_of.content ?? '')}
-            </p>
-          </div>
-        )}
+            </Link>
+          );
+        })()}
 
         {/* Hashtags display (if provided as structured data) */}
         {post.hashtags && post.hashtags.length > 0 && (

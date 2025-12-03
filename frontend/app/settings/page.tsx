@@ -1,13 +1,14 @@
 // frontend/app/settings/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
-import { accountAPI } from '@/services/api';
+import { accountAPI, usersAPI } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
@@ -18,8 +19,21 @@ import {
   Trash2,
   LogOut,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  MapPin,
+  Link as LinkIcon,
+  FileText,
+  Image as ImageIcon,
+  RefreshCw
 } from 'lucide-react';
+
+interface UserProfile {
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatar_url?: string;
+  header_url?: string;
+}
 
 function SettingsContent() {
   const { user, setUser, logout } = useAuth();
@@ -28,7 +42,16 @@ function SettingsContent() {
   // Account settings state
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+
+  // Profile settings state
+  const [bio, setBio] = useState('');
+  const [location, setLocation] = useState('');
+  const [website, setWebsite] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [headerUrl, setHeaderUrl] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   // Password change state
   const [oldPassword, setOldPassword] = useState('');
@@ -47,7 +70,33 @@ function SettingsContent() {
   const [likeNotifs, setLikeNotifs] = useState(true);
   const [replyNotifs, setReplyNotifs] = useState(true);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  // Fetch current profile data
+  const fetchProfile = useCallback(async () => {
+    if (!user?.username) return;
+    
+    setProfileLoading(true);
+    try {
+      const response = await usersAPI.getByUsername(user.username);
+      const profile = response.data?.profile as UserProfile;
+      if (profile) {
+        setBio(profile.bio || '');
+        setLocation(profile.location || '');
+        setWebsite(profile.website || '');
+        setAvatarUrl(profile.avatar_url || '');
+        setHeaderUrl(profile.header_url || '');
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [user?.username]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const handleUpdateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -57,6 +106,35 @@ function SettingsContent() {
       const response = await accountAPI.update({ username, email });
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
+      setSuccess('Account updated successfully!');
+      setIsEditingAccount(false);
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : (typeof err === 'object' && err !== null && 'response' in err)
+          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          : undefined;
+      setError(message || 'Failed to update account');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await accountAPI.updateProfile({
+        bio: bio.trim(),
+        location: location.trim(),
+        website: website.trim(),
+        avatar_url: avatarUrl.trim(),
+        header_url: headerUrl.trim(),
+      });
       setSuccess('Profile updated successfully!');
       setIsEditingProfile(false);
     } catch (err: unknown) {
@@ -64,7 +142,8 @@ function SettingsContent() {
         typeof err === 'string'
           ? err
           : (typeof err === 'object' && err !== null && 'response' in err)
-          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
+          ? (err as { response?: { data?: { error?: string; detail?: string } } }).response?.data?.error || 
+            (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
           : undefined;
       setError(message || 'Failed to update profile');
     } finally {
@@ -176,15 +255,19 @@ function SettingsContent() {
 
         {/* Account Tab */}
         <TabsContent value="account" className="space-y-6">
+          {/* Account Information Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Account Information
+              </CardTitle>
               <CardDescription>
-                Update your account details
+                Update your username and email
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <form onSubmit={handleUpdateAccount} className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="username" className="text-sm font-medium">
                     Username
@@ -194,7 +277,7 @@ function SettingsContent() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    disabled={!isEditingProfile || loading}
+                    disabled={!isEditingAccount || loading}
                     required
                     minLength={3}
                     maxLength={50}
@@ -210,7 +293,7 @@ function SettingsContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={!isEditingProfile || loading}
+                    disabled={!isEditingAccount || loading}
                     required
                   />
                 </div>
@@ -220,7 +303,7 @@ function SettingsContent() {
                   <Input value={user?.id} disabled />
                 </div>
 
-                {isEditingProfile ? (
+                {isEditingAccount ? (
                   <div className="flex gap-2">
                     <Button type="submit" disabled={loading}>
                       {loading ? 'Saving...' : 'Save Changes'}
@@ -231,7 +314,7 @@ function SettingsContent() {
                       onClick={() => {
                         setUsername(user?.username || '');
                         setEmail(user?.email || '');
-                        setIsEditingProfile(false);
+                        setIsEditingAccount(false);
                         setError('');
                         setSuccess('');
                       }}
@@ -243,12 +326,152 @@ function SettingsContent() {
                 ) : (
                   <Button
                     type="button"
-                    onClick={() => setIsEditingProfile(true)}
+                    onClick={() => setIsEditingAccount(true)}
                   >
-                    Edit Profile
+                    Edit Account
                   </Button>
                 )}
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Profile Information Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Profile Information
+              </CardTitle>
+              <CardDescription>
+                Customize your public profile - bio, location, website, and images
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {profileLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />
+                </div>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="bio" className="text-sm font-medium flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Bio
+                    </label>
+                    <Textarea
+                      id="bio"
+                      placeholder="Tell us about yourself..."
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      disabled={!isEditingProfile || loading}
+                      maxLength={160}
+                      className="resize-none"
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-500">{bio.length}/160 characters</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Location
+                    </label>
+                    <Input
+                      id="location"
+                      type="text"
+                      placeholder="e.g., San Francisco, CA"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      disabled={!isEditingProfile || loading}
+                      maxLength={100}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="website" className="text-sm font-medium flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4" />
+                      Website
+                    </label>
+                    <Input
+                      id="website"
+                      type="url"
+                      placeholder="https://yourwebsite.com"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      disabled={!isEditingProfile || loading}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <label htmlFor="avatarUrl" className="text-sm font-medium flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Avatar URL
+                    </label>
+                    <Input
+                      id="avatarUrl"
+                      type="url"
+                      placeholder="https://example.com/your-avatar.jpg"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      disabled={!isEditingProfile || loading}
+                    />
+                    <p className="text-xs text-gray-500">Direct link to your profile picture</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="headerUrl" className="text-sm font-medium flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Header Image URL
+                    </label>
+                    <Input
+                      id="headerUrl"
+                      type="url"
+                      placeholder="https://example.com/your-header.jpg"
+                      value={headerUrl}
+                      onChange={(e) => setHeaderUrl(e.target.value)}
+                      disabled={!isEditingProfile || loading}
+                    />
+                    <p className="text-xs text-gray-500">Direct link to your profile header/banner image</p>
+                  </div>
+
+                  {isEditingProfile ? (
+                    <div className="flex gap-2">
+                      <Button type="submit" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Profile'
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          fetchProfile();
+                          setIsEditingProfile(false);
+                          setError('');
+                          setSuccess('');
+                        }}
+                        disabled={loading}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={() => setIsEditingProfile(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  )}
+                </form>
+              )}
             </CardContent>
           </Card>
 
