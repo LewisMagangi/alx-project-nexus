@@ -111,9 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(null);
-      router.push('/auth/login');
+      router.push('/'); // Redirect to home page after logout
     }
-  };
+  }
 
   // Set auth data from social login
   const setAuthData = (access: string, refresh: string, userData: User) => {
