@@ -28,6 +28,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 class CustomPasswordChangeSerializer(serializers.Serializer):
     """Custom serializer for password change to avoid name clash with dj-rest-auth."""
+
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
