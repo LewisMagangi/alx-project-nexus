@@ -80,15 +80,14 @@ class LoginView(generics.GenericAPIView):
 
 @extend_schema(
     tags=["auth"],
-    responses={
-        200: {"type": "object", "properties": {"detail": {"type": "string"}}}
-    },
+    responses={200: {"type": "object", "properties": {"detail": {"type": "string"}}}},
 )
 class LogoutView(generics.GenericAPIView):
     """
     Logout endpoint that blacklists the refresh token.
     For JWT auth, this invalidates the refresh token so it can't be used to get new access tokens.
     """
+
     permission_classes = [AllowAny]
     serializer_class = None
 
@@ -98,19 +97,21 @@ class LogoutView(generics.GenericAPIView):
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
-            return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
+            )
         except Exception:
             # Even if token is invalid or missing, we return success
             # The client will clear their local storage anyway
-            return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
+            )
 
 
 # Social OAuth login initiation views
 @extend_schema(
     tags=["auth"],
-    responses={
-        200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}
-    },
+    responses={200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}},
 )
 class GoogleLoginInitView(generics.GenericAPIView):
     permission_classes = [AllowAny]
@@ -138,9 +139,7 @@ class GoogleLoginInitView(generics.GenericAPIView):
 
 @extend_schema(
     tags=["auth"],
-    responses={
-        200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}
-    },
+    responses={200: {"type": "object", "properties": {"auth_url": {"type": "string"}}}},
 )
 class GitHubLoginInitView(generics.GenericAPIView):
     permission_classes = [AllowAny]
@@ -175,9 +174,7 @@ class GoogleCallbackView(generics.GenericAPIView):
     def post(self, request):
         code = request.data.get("code")
         if not code:
-            return Response(
-                {"error": "Authorization code is required."}, status=400
-            )
+            return Response({"error": "Authorization code is required."}, status=400)
 
         # Exchange code for access token
         token_url = "https://oauth2.googleapis.com/token"
@@ -293,9 +290,7 @@ class GitHubCallbackView(generics.GenericAPIView):
     def post(self, request):
         code = request.data.get("code")
         if not code:
-            return Response(
-                {"error": "Authorization code is required."}, status=400
-            )
+            return Response({"error": "Authorization code is required."}, status=400)
 
         # Exchange code for access token
         token_url = "https://github.com/login/oauth/access_token"
@@ -349,9 +344,7 @@ class GitHubCallbackView(generics.GenericAPIView):
                     headers={"Authorization": f"Bearer {access_token}"},
                 )
                 emails = emails_response.json()
-                primary_email = next(
-                    (e for e in emails if e.get("primary")), None
-                )
+                primary_email = next((e for e in emails if e.get("primary")), None)
                 email = primary_email.get("email") if primary_email else None
 
             if not email:
@@ -494,9 +487,7 @@ class EmailVerificationView(generics.GenericAPIView):
             user = User.objects.get(email=email)
             # Verify using secure hash comparison
             if not verify_token(key, user.profile.email_verification_key):
-                return Response(
-                    {"error": "Invalid verification key."}, status=400
-                )
+                return Response({"error": "Invalid verification key."}, status=400)
             user.profile.is_verified = True
             user.profile.email_verification_key = ""
             user.profile.save()
@@ -518,16 +509,16 @@ class ResendVerificationEmailView(generics.GenericAPIView):
         try:
             user = User.objects.get(email=email)
             if user.profile.is_verified:
-                return Response(
-                    {"detail": "Email already verified."}, status=200
-                )
+                return Response({"detail": "Email already verified."}, status=200)
             # Generate verification key
             key = get_random_string(32)
             # Store the hashed key, not the plaintext
             user.profile.email_verification_key = hash_token(key)
             user.profile.save()
             # Send the plaintext key to the user via email
-            verify_url = f"{settings.FRONTEND_URL}/auth/verify-email/?key={key}&email={email}"
+            verify_url = (
+                f"{settings.FRONTEND_URL}/auth/verify-email/?key={key}&email={email}"
+            )
             send_mail(
                 "Verify your email",
                 f"Verify your email: {verify_url}",
@@ -537,9 +528,7 @@ class ResendVerificationEmailView(generics.GenericAPIView):
             return Response({"detail": "Verification email sent."}, status=200)
         except User.DoesNotExist:
             return Response(
-                {
-                    "detail": "If the email exists, a verification link will be sent."
-                },
+                {"detail": "If the email exists, a verification link will be sent."},
                 status=200,
             )
 
