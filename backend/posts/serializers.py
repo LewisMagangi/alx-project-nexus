@@ -2,6 +2,7 @@
 Post serializers with support for retweets, quotes, threads, hashtags, mentions.
 Uses drf-spectacular for OpenAPI documentation.
 """
+
 import re
 
 from django.contrib.auth import get_user_model
@@ -26,6 +27,7 @@ class HashtagSerializer(serializers.ModelSerializer):
 
 class MentionSerializer(serializers.ModelSerializer):
     """Serializer for mention data"""
+
     username = serializers.CharField(source="mentioned_user.username")
 
     class Meta:
@@ -51,6 +53,7 @@ class PostSerializer(serializers.ModelSerializer):
     - Retweets and quote tweets
     - Hashtags and mentions
     """
+
     username = serializers.ReadOnlyField(source="user.username")
     user_data = UserMiniSerializer(source="user", read_only=True)
     hashtags = serializers.SerializerMethodField()
@@ -66,7 +69,7 @@ class PostSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
         allow_null=True,
-        help_text="Post ID to quote tweet"
+        help_text="Post ID to quote tweet",
     )
 
     class Meta:
@@ -141,7 +144,7 @@ class PostSerializer(serializers.ModelSerializer):
                 user=request.user,
                 retweet_of=obj,
                 is_deleted=False,
-                is_quote_tweet=False
+                is_quote_tweet=False,
             ).exists()
         return False
 
@@ -159,6 +162,7 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             from bookmarks.models import Bookmark
+
             return Bookmark.objects.filter(user=request.user, post=obj).exists()
         return False
 
@@ -194,15 +198,9 @@ class PostSerializer(serializers.ModelSerializer):
                 continue
 
             hashtag, _ = Hashtag.objects.get_or_create(tag=tag_normalized)
-            PostHashtag.objects.create(
-                post=post,
-                hashtag=hashtag,
-                position=position
-            )
+            PostHashtag.objects.create(post=post, hashtag=hashtag, position=position)
             # Update hashtag use_count
-            Hashtag.objects.filter(pk=hashtag.pk).update(
-                use_count=F("use_count") + 1
-            )
+            Hashtag.objects.filter(pk=hashtag.pk).update(use_count=F("use_count") + 1)
 
     def _process_mentions(self, post, content, user):
         """Extract mentions from content and create associations"""
@@ -215,16 +213,17 @@ class PostSerializer(serializers.ModelSerializer):
                     post=post,
                     mentioned_user=mentioned,
                     mentioner_user=user,
-                    position=position
+                    position=position,
                 )
                 # Create notification for mentioned user
                 from notifications.models import Notification
+
                 Notification.objects.create(
                     user=mentioned,
                     actor=user,
                     verb="mentioned you in a post",
                     target_type="post",
-                    target_id=post.id
+                    target_id=post.id,
                 )
             except User.DoesNotExist:
                 pass  # Invalid mention, skip
@@ -235,6 +234,7 @@ class PostMiniSerializer(serializers.ModelSerializer):
     Minimal post serializer for nested representations.
     Used in retweet_of_data to avoid infinite recursion.
     """
+
     username = serializers.ReadOnlyField(source="user.username")
 
     class Meta:
@@ -254,6 +254,7 @@ class PostMiniSerializer(serializers.ModelSerializer):
 
 class LikeSerializer(serializers.ModelSerializer):
     """Serializer for likes"""
+
     username = serializers.ReadOnlyField(source="user.username")
 
     class Meta:
@@ -264,6 +265,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     """Serializer for follows"""
+
     follower_username = serializers.ReadOnlyField(source="follower.username")
     following_username = serializers.ReadOnlyField(source="following.username")
 
@@ -275,13 +277,14 @@ class FollowSerializer(serializers.ModelSerializer):
             "following",
             "follower_username",
             "following_username",
-            "created_at"
+            "created_at",
         ]
         read_only_fields = ["follower", "created_at"]
 
 
 class TrendingHashtagSerializer(serializers.Serializer):
     """Serializer for trending hashtag response"""
+
     id = serializers.IntegerField()
     tag = serializers.CharField()
     use_count = serializers.IntegerField()
