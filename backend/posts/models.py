@@ -7,6 +7,7 @@ Posts models with support for:
 - Hashtags
 - Mentions
 """
+
 import re
 
 from django.contrib.auth.models import User
@@ -25,6 +26,7 @@ class Post(models.Model):
     - Retweets (retweet_of set, no content)
     - Quote tweets (retweet_of set + content)
     """
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts"
     )
@@ -116,6 +118,7 @@ class Post(models.Model):
 
 class Hashtag(models.Model):
     """Normalized hashtag storage for 3NF compliance"""
+
     tag = models.CharField(max_length=100, unique=True, db_index=True)
 
     # Trending support (denormalized)
@@ -149,6 +152,7 @@ class Hashtag(models.Model):
 
 class PostHashtag(models.Model):
     """Many-to-many relationship between posts and hashtags (3NF)"""
+
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="post_hashtags"
     )
@@ -170,6 +174,7 @@ class PostHashtag(models.Model):
 
 class Mention(models.Model):
     """User mentions in posts (@username) - 3NF compliant"""
+
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="mentions"
     )
@@ -205,6 +210,7 @@ class Mention(models.Model):
 
 class Like(models.Model):
     """User likes on posts"""
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="likes"
     )
@@ -226,6 +232,7 @@ class Like(models.Model):
 
 class Follow(models.Model):
     """User follow relationships"""
+
     follower = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="following"
     )
@@ -249,6 +256,7 @@ class Follow(models.Model):
 # =============================================================================
 # SIGNALS FOR DENORMALIZED COUNT UPDATES
 # =============================================================================
+
 
 @receiver(post_save, sender=Post)
 def update_reply_count_on_create(sender, instance, created, **kwargs):

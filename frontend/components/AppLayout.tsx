@@ -47,13 +47,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
-      
+
       <div className="flex pt-16 min-h-screen">
         {/* Sidebar (slide-out) */}
         {user && (
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         )}
-        
+
         {/* Main content - shifts when sidebar is open */}
         <main className={`flex-1 bg-gray-50 transition-all duration-300 ${sidebarOpen && user ? 'lg:ml-72' : ''}`}>
           {children}

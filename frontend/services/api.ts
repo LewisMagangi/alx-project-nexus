@@ -80,7 +80,7 @@ export const postsAPI = {
 
   getById: (id: number) => api.get(`/api/posts/${id}/`),
 
-  create: (data: { content: string; parent_post?: number | null }) =>
+  create: (data: { content: string; parent_post?: number | null; quote_of?: number | null }) =>
     api.post('/api/posts/', data),
 
   update: (id: number, data: { content: string }) =>
@@ -207,6 +207,16 @@ export const searchAPI = {
 export const accountAPI = {
   update: (data: { username?: string; email?: string }) =>
     api.put('/api/account/update/', data),
+
+  updateProfile: (data: {
+    bio?: string;
+    location?: string;
+    website?: string;
+    avatar_url?: string;
+    header_url?: string;
+  }) => api.patch('/api/account/profile/', data),
+
+  getProfile: () => api.get('/api/account/profile/'),
 
   changePassword: (data: { old_password: string; new_password: string }) =>
     api.post('/api/account/password/', data),

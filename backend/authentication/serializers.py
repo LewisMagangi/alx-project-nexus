@@ -28,6 +28,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
 
 class CustomLoginSerializer(serializers.Serializer):
     """Custom login serializer supporting username or email authentication."""
+
     username = serializers.CharField(help_text="Username or email address")
     password = serializers.CharField(write_only=True)
 
@@ -42,7 +43,9 @@ class CustomLoginSerializer(serializers.Serializer):
         if not user:
             try:
                 user_obj = User.objects.get(email=username_or_email)
-                user = authenticate(username=user_obj.username, password=password)
+                user = authenticate(
+                    username=user_obj.username, password=password
+                )
             except User.DoesNotExist:
                 pass
 
@@ -55,6 +58,7 @@ class CustomLoginSerializer(serializers.Serializer):
 
 class AuthResponseSerializer(serializers.Serializer):
     """Serializer for authentication response with JWT tokens."""
+
     refresh = serializers.CharField()
     access = serializers.CharField()
     user = serializers.DictField()
@@ -62,11 +66,13 @@ class AuthResponseSerializer(serializers.Serializer):
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     """Serializer for password reset request."""
+
     email = serializers.EmailField()
 
 
 class CustomPasswordResetConfirmSerializer(serializers.Serializer):
     """Serializer for password reset confirmation."""
+
     email = serializers.EmailField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
@@ -74,15 +80,18 @@ class CustomPasswordResetConfirmSerializer(serializers.Serializer):
 
 class EmailVerificationSerializer(serializers.Serializer):
     """Serializer for email verification."""
+
     email = serializers.EmailField()
     key = serializers.CharField()
 
 
 class ResendVerificationSerializer(serializers.Serializer):
     """Serializer for resending verification email."""
+
     email = serializers.EmailField()
 
 
 class SocialAuthCodeSerializer(serializers.Serializer):
     """Serializer for social auth callback code."""
+
     code = serializers.CharField()

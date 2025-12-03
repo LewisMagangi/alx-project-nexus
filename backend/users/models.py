@@ -8,27 +8,29 @@ class UserProfile(models.Model):
         User, on_delete=models.CASCADE, related_name="profile"
     )
     accepted_legal_policies = models.BooleanField(default=False)
-    
+
     # Profile information
     bio = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     website = models.URLField(max_length=255, blank=True, null=True)
-    
+
     # Profile images (stored as URLs)
     avatar_url = models.URLField(max_length=500, blank=True, null=True)
     header_url = models.URLField(max_length=500, blank=True, null=True)
-    
+
     # Denormalized counts for profile display
     followers_count = models.IntegerField(default=0)
     following_count = models.IntegerField(default=0)
     posts_count = models.IntegerField(default=0)
-    
+
     # Account status
     is_verified = models.BooleanField(default=False)
-    
+
     # Password reset and email verification tokens
     reset_token = models.CharField(max_length=64, blank=True, default="")
-    email_verification_key = models.CharField(max_length=64, blank=True, default="")
+    email_verification_key = models.CharField(
+        max_length=64, blank=True, default=""
+    )
 
     def __str__(self):
         return f"Profile for {self.user.username}"

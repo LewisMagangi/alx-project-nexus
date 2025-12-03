@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Follow, Like, Post, Hashtag, PostHashtag, Mention
+from .models import Follow, Hashtag, Like, Mention, Post, PostHashtag
 
 
 @admin.register(Post)

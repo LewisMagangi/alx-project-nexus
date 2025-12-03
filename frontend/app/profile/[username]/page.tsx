@@ -76,15 +76,15 @@ function ProfileContent() {
     const fetchProfileData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch user profile
         const userRes = await usersAPI.getByUsername(username);
         setProfileUser(userRes.data);
 
         // Fetch user's posts
         const postsRes = await postsAPI.getUserPosts(userRes.data.id);
-        const userPosts = Array.isArray(postsRes.data) 
-          ? postsRes.data 
+        const userPosts = Array.isArray(postsRes.data)
+          ? postsRes.data
           : (postsRes.data.results || []);
         setPosts(userPosts);
 
@@ -94,11 +94,11 @@ function ProfileContent() {
           const allFollows = Array.isArray(followsRes.data)
             ? followsRes.data
             : (followsRes.data.results || []);
-          
+
           const existingFollow = allFollows.find(
             (f: Follow) => f.follower === currentUser?.id && f.following === userRes.data.id
           );
-          
+
           if (existingFollow) {
             setIsFollowing(true);
             setFollowId(existingFollow.id);
@@ -121,12 +121,12 @@ function ProfileContent() {
 
   const handleFollow = async () => {
     if (!profileUser) return;
-    
+
     try {
       const response = await followsAPI.create(profileUser.id);
       setIsFollowing(true);
       setFollowId(response.data.id);
-      
+
       // Update follower count
       setProfileUser({
         ...profileUser,
@@ -142,12 +142,12 @@ function ProfileContent() {
 
   const handleUnfollow = async () => {
     if (!followId) return;
-    
+
     try {
       await followsAPI.delete(followId);
       setIsFollowing(false);
       setFollowId(null);
-      
+
       // Update follower count
       if (profileUser) {
         setProfileUser({
@@ -231,8 +231,8 @@ function ProfileContent() {
           {/* Action Buttons */}
           <div className="mt-4">
             {isOwnProfile ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => router.push('/settings')}
               >
                 <Settings className="h-4 w-4 mr-2" />
@@ -282,9 +282,9 @@ function ProfileContent() {
           {profileUser.profile.website && (
             <div className="flex items-center gap-1">
               <LinkIcon className="h-4 w-4" />
-              <a 
-                href={profileUser.profile.website} 
-                target="_blank" 
+              <a
+                href={profileUser.profile.website}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
               >

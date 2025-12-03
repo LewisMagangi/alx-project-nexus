@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 # Load frontend URL from environment
@@ -142,7 +143,9 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = (
+    "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+)
 
 # These should match your deployment URLs
 SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL = os.getenv("GOOGLE_REDIRECT_URI")
@@ -156,7 +159,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.LimitOffsetPagination"
+    ),
     "PAGE_SIZE": 20,
 }
 
@@ -192,8 +197,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-
-import dj_database_url
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -308,9 +311,11 @@ else:
 # Security settings for production
 if IS_PRODUCTION:
     # HTTPS/SSL settings
-    SECURE_SSL_REDIRECT = os.getenv(
-        "SECURE_SSL_REDIRECT", "True"
-    ).lower() in ["true", "1", "yes"]
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True").lower() in [
+        "true",
+        "1",
+        "yes",
+    ]
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -363,5 +368,9 @@ LOGGING = {
 # Email backend for development/testing
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend" if IS_DEVELOPMENT else "django.core.mail.backends.smtp.EmailBackend"
+    (
+        "django.core.mail.backends.console.EmailBackend"
+        if IS_DEVELOPMENT
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
 )

@@ -39,7 +39,7 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. What Are Cookies?</h2>
               <p className="mb-4">
-                Cookies are small text files that are placed on your computer or mobile device when you visit a website. 
+                Cookies are small text files that are placed on your computer or mobile device when you visit a website.
                 They are widely used to make websites work more efficiently and provide information to website owners.
               </p>
               <p>
@@ -61,11 +61,11 @@ export default function CookiePolicyPage() {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. Types of Cookies We Use</h2>
-              
+
               <div className="bg-blue-50 rounded-lg p-6 mb-4">
                 <h3 className="text-xl font-medium text-gray-800 mb-3">3.1 Essential Cookies</h3>
                 <p className="mb-2">
-                  These cookies are necessary for the platform to function and cannot be switched off. They are usually 
+                  These cookies are necessary for the platform to function and cannot be switched off. They are usually
                   set in response to actions made by you, such as logging in or filling in forms.
                 </p>
                 <table className="w-full mt-4 text-sm">
@@ -132,7 +132,7 @@ export default function CookiePolicyPage() {
               <div className="bg-yellow-50 rounded-lg p-6 mb-4">
                 <h3 className="text-xl font-medium text-gray-800 mb-3">3.3 Analytics Cookies</h3>
                 <p className="mb-2">
-                  These cookies help us understand how visitors interact with our platform by collecting and reporting 
+                  These cookies help us understand how visitors interact with our platform by collecting and reporting
                   information anonymously.
                 </p>
                 <table className="w-full mt-4 text-sm">
@@ -166,7 +166,7 @@ export default function CookiePolicyPage() {
               <div className="bg-purple-50 rounded-lg p-6 mb-4">
                 <h3 className="text-xl font-medium text-gray-800 mb-3">3.4 Performance Cookies</h3>
                 <p className="mb-2">
-                  These cookies collect information about how you use our platform, like which pages you visit most often, 
+                  These cookies collect information about how you use our platform, like which pages you visit most often,
                   helping us improve performance.
                 </p>
                 <table className="w-full mt-4 text-sm">
@@ -196,7 +196,7 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Third-Party Cookies</h2>
               <p className="mb-4">
-                Some cookies on our platform are placed by third-party services that appear on our pages. 
+                Some cookies on our platform are placed by third-party services that appear on our pages.
                 We do not control these cookies. Third parties that may set cookies include:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -211,7 +211,7 @@ export default function CookiePolicyPage() {
               <p className="mb-4">
                 You have control over how cookies are used. Here are your options:
               </p>
-              
+
               <h3 className="text-xl font-medium text-gray-800 mb-3">5.1 Browser Settings</h3>
               <p className="mb-4">
                 Most web browsers allow you to control cookies through their settings. You can:
@@ -224,26 +224,26 @@ export default function CookiePolicyPage() {
                 <li>Clear cookies when you close your browser</li>
               </ul>
               <p className="mb-4">
-                <strong>Note:</strong> Blocking all cookies may affect your experience on Nexus. 
+                <strong>Note:</strong> Blocking all cookies may affect your experience on Nexus.
                 Essential cookies are required for the platform to function properly.
               </p>
 
               <h3 className="text-xl font-medium text-gray-800 mb-3">5.2 Browser-Specific Instructions</h3>
               <ul className="list-disc pl-6 mb-4 space-y-2">
                 <li>
-                  <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" 
+                  <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer"
                      className="text-blue-600 hover:underline">Google Chrome</a>
                 </li>
                 <li>
-                  <a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" 
+                  <a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer"
                      target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Mozilla Firefox</a>
                 </li>
                 <li>
-                  <a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" 
+                  <a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac"
                      target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Safari</a>
                 </li>
                 <li>
-                  <a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" 
+                  <a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09"
                      target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Microsoft Edge</a>
                 </li>
               </ul>
@@ -251,7 +251,7 @@ export default function CookiePolicyPage() {
               <h3 className="text-xl font-medium text-gray-800 mb-3">5.3 Opt-Out of Analytics</h3>
               <p className="mb-4">
                 To opt out of Google Analytics tracking, you can install the{' '}
-                <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" 
+                <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer"
                    className="text-blue-600 hover:underline">Google Analytics Opt-out Browser Add-on</a>.
               </p>
             </section>
@@ -263,7 +263,7 @@ export default function CookiePolicyPage() {
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
                 <li>
-                  <strong>Local Storage:</strong> Used to store preferences and data locally in your browser. 
+                  <strong>Local Storage:</strong> Used to store preferences and data locally in your browser.
                   Unlike cookies, this data is not sent to our servers with every request.
                 </li>
                 <li>
@@ -278,8 +278,8 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Do Not Track</h2>
               <p className="mb-4">
-                Some browsers have a &quot;Do Not Track&quot; feature that signals to websites that you do not want 
-                your online activity tracked. Currently, there is no industry standard for how websites should 
+                Some browsers have a &quot;Do Not Track&quot; feature that signals to websites that you do not want
+                your online activity tracked. Currently, there is no industry standard for how websites should
                 respond to DNT signals. We do not currently respond to DNT signals.
               </p>
             </section>
@@ -287,8 +287,8 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Updates to This Policy</h2>
               <p className="mb-4">
-                We may update this Cookie Policy from time to time to reflect changes in our practices or for 
-                legal, operational, or regulatory reasons. We will notify you of any material changes by posting 
+                We may update this Cookie Policy from time to time to reflect changes in our practices or for
+                legal, operational, or regulatory reasons. We will notify you of any material changes by posting
                 the new policy on this page.
               </p>
             </section>

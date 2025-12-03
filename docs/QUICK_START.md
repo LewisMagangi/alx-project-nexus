@@ -70,10 +70,10 @@ npm test -- --testPathPattern=api  # Specific pattern
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Frontend | http://localhost:3000 | Next.js app |
-| Backend API | http://localhost:8000/api/ | REST API |
-| Swagger Docs | http://localhost:8000/api/swagger/ | Interactive API docs |
-| Django Admin | http://localhost:8000/admin/ | Admin interface |
+| Frontend | <http://localhost:3000> | Next.js app |
+| Backend API | <http://localhost:8000/api/> | REST API |
+| Swagger Docs | <http://localhost:8000/api/swagger/> | Interactive API docs |
+| Django Admin | <http://localhost:8000/admin/> | Admin interface |
 
 ## 🔑 Test Credentials
 

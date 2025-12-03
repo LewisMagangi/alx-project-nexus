@@ -18,7 +18,7 @@ cp .env.example .env.local
 ### Required Variables
 
 | Variable | Description | Example |
-|----------|-------------|---------|  
+|----------|-------------|---------|
 | `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:8000` |
 
 ### Vercel Deployment

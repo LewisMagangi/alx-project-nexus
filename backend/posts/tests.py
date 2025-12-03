@@ -6,6 +6,7 @@ Comprehensive tests for posts app including:
 - Mentions
 - API endpoints
 """
+
 import pytest
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -24,9 +25,7 @@ def api_client():
 def user(db):
     """Create a test user"""
     return User.objects.create_user(
-        username="testuser",
-        email="test@example.com",
-        password="testpass123"
+        username="testuser", email="test@example.com", password="testpass123"
     )
 
 
@@ -36,7 +35,7 @@ def other_user(db):
     return User.objects.create_user(
         username="otheruser",
         email="other@example.com",
-        password="otherpass123"
+        password="otherpass123",
     )
 
 
@@ -50,19 +49,13 @@ def authenticated_client(api_client, user):
 @pytest.fixture
 def post(db, user):
     """Create a test post"""
-    return Post.objects.create(
-        user=user,
-        content="Test post content"
-    )
+    return Post.objects.create(user=user, content="Test post content")
 
 
 @pytest.fixture
 def post_with_hashtag(db, user):
     """Create a post with a hashtag"""
-    post = Post.objects.create(
-        user=user,
-        content="Test post #python #django"
-    )
+    post = Post.objects.create(user=user, content="Test post #python #django")
     # Create hashtags
     for tag in ["python", "django"]:
         hashtag, _ = Hashtag.objects.get_or_create(tag=tag)
@@ -73,6 +66,7 @@ def post_with_hashtag(db, user):
 # =============================================================================
 # POST MODEL TESTS
 # =============================================================================
+
 
 class TestPostModel:
     """Tests for the Post model"""
@@ -89,9 +83,7 @@ class TestPostModel:
     def test_create_reply(self, db, user, post):
         """Test creating a reply"""
         reply = Post.objects.create(
-            user=user,
-            content="This is a reply",
-            parent_post=post
+            user=user, content="This is a reply", parent_post=post
         )
         assert reply.is_reply
         assert reply.parent_post == post
@@ -100,23 +92,17 @@ class TestPostModel:
     def test_nested_replies_set_root(self, db, user, post):
         """Test that nested replies correctly set root_post"""
         reply1 = Post.objects.create(
-            user=user,
-            content="First reply",
-            parent_post=post
+            user=user, content="First reply", parent_post=post
         )
         reply2 = Post.objects.create(
-            user=user,
-            content="Reply to reply",
-            parent_post=reply1
+            user=user, content="Reply to reply", parent_post=reply1
         )
         assert reply2.root_post == post
 
     def test_retweet_properties(self, db, user, other_user, post):
         """Test retweet is_retweet property"""
         retweet = Post.objects.create(
-            user=other_user,
-            content="",
-            retweet_of=post
+            user=other_user, content="", retweet_of=post
         )
         assert retweet.is_retweet
         assert not retweet.is_quote_tweet
@@ -124,9 +110,7 @@ class TestPostModel:
     def test_quote_tweet_properties(self, db, user, other_user, post):
         """Test quote tweet is_quote_tweet property"""
         quote = Post.objects.create(
-            user=other_user,
-            content="Great post!",
-            retweet_of=post
+            user=other_user, content="Great post!", retweet_of=post
         )
         assert quote.is_quote_tweet
         assert not quote.is_retweet
@@ -135,6 +119,7 @@ class TestPostModel:
 # =============================================================================
 # HASHTAG TESTS
 # =============================================================================
+
 
 class TestHashtag:
     """Tests for hashtag functionality"""
@@ -164,6 +149,7 @@ class TestHashtag:
 # MENTION TESTS
 # =============================================================================
 
+
 class TestMention:
     """Tests for mention functionality"""
 
@@ -178,9 +164,7 @@ class TestMention:
     def test_create_mention(self, db, user, other_user, post):
         """Test creating a mention"""
         mention = Mention.objects.create(
-            post=post,
-            mentioned_user=other_user,
-            mentioner_user=user
+            post=post, mentioned_user=other_user, mentioner_user=user
         )
         assert mention.mentioned_user == other_user
         assert mention.mentioner_user == user
@@ -190,26 +174,21 @@ class TestMention:
 # SIGNAL TESTS
 # =============================================================================
 
+
 class TestSignals:
     """Tests for model signals"""
 
     def test_reply_count_increments(self, db, user, post):
         """Test that reply_count increments on reply creation"""
         initial_count = post.reply_count
-        Post.objects.create(
-            user=user,
-            content="Reply",
-            parent_post=post
-        )
+        Post.objects.create(user=user, content="Reply", parent_post=post)
         post.refresh_from_db()
         assert post.reply_count == initial_count + 1
 
     def test_reply_count_decrements(self, db, user, post):
         """Test that reply_count decrements on reply deletion"""
         reply = Post.objects.create(
-            user=user,
-            content="Reply",
-            parent_post=post
+            user=user, content="Reply", parent_post=post
         )
         post.refresh_from_db()
         initial_count = post.reply_count
@@ -238,6 +217,7 @@ class TestSignals:
 # API ENDPOINT TESTS
 # =============================================================================
 
+
 class TestPostAPI:
     """Tests for post API endpoints"""
 
@@ -249,8 +229,7 @@ class TestPostAPI:
     def test_create_post(self, authenticated_client):
         """Test creating a post via API"""
         response = authenticated_client.post(
-            "/api/posts/",
-            {"content": "New post from API"}
+            "/api/posts/", {"content": "New post from API"}
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["content"] == "New post from API"
@@ -258,8 +237,7 @@ class TestPostAPI:
     def test_create_post_with_hashtags(self, authenticated_client):
         """Test creating a post with hashtags"""
         response = authenticated_client.post(
-            "/api/posts/",
-            {"content": "Testing #api #rest"}
+            "/api/posts/", {"content": "Testing #api #rest"}
         )
         assert response.status_code == status.HTTP_201_CREATED
         # Check hashtags were created
@@ -270,10 +248,7 @@ class TestPostAPI:
         """Test creating a reply via API"""
         response = authenticated_client.post(
             "/api/posts/",
-            {
-                "content": "This is a reply",
-                "parent_post": post.id
-            }
+            {"content": "This is a reply", "parent_post": post.id},
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["parent_post"] == post.id
@@ -300,10 +275,7 @@ class TestRetweetAPI:
         response = authenticated_client.post(f"/api/posts/{post.id}/retweet/")
         assert response.status_code == status.HTTP_201_CREATED
         # Check retweet was created
-        retweet = Post.objects.filter(
-            user=user,
-            retweet_of=post
-        ).first()
+        retweet = Post.objects.filter(user=user, retweet_of=post).first()
         assert retweet is not None
         assert retweet.is_retweet
 
@@ -316,12 +288,16 @@ class TestRetweetAPI:
     def test_unretweet(self, authenticated_client, post, user):
         """Test unretweeting a post"""
         authenticated_client.post(f"/api/posts/{post.id}/retweet/")
-        response = authenticated_client.post(f"/api/posts/{post.id}/unretweet/")
+        response = authenticated_client.post(
+            f"/api/posts/{post.id}/unretweet/"
+        )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_unretweet_not_retweeted(self, authenticated_client, post):
         """Test unretweeting when not retweeted fails"""
-        response = authenticated_client.post(f"/api/posts/{post.id}/unretweet/")
+        response = authenticated_client.post(
+            f"/api/posts/{post.id}/unretweet/"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -332,14 +308,10 @@ class TestThreadAPI:
         """Test getting a thread"""
         # Create replies
         reply1 = Post.objects.create(
-            user=user,
-            content="Reply 1",
-            parent_post=post
+            user=user, content="Reply 1", parent_post=post
         )
         reply2 = Post.objects.create(
-            user=user,
-            content="Reply 2",
-            parent_post=reply1
+            user=user, content="Reply 2", parent_post=reply1
         )
 
         response = authenticated_client.get(f"/api/posts/{post.id}/thread/")
@@ -349,11 +321,7 @@ class TestThreadAPI:
 
     def test_get_replies(self, authenticated_client, post, user):
         """Test getting direct replies"""
-        Post.objects.create(
-            user=user,
-            content="Reply 1",
-            parent_post=post
-        )
+        Post.objects.create(user=user, content="Reply 1", parent_post=post)
         response = authenticated_client.get(f"/api/posts/{post.id}/replies/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
@@ -381,14 +349,11 @@ class TestMentionAPI:
     def test_create_post_with_mention(self, authenticated_client, other_user):
         """Test creating a post with mentions"""
         response = authenticated_client.post(
-            "/api/posts/",
-            {"content": f"Hello @{other_user.username}!"}
+            "/api/posts/", {"content": f"Hello @{other_user.username}!"}
         )
         assert response.status_code == status.HTTP_201_CREATED
         # Check mention was created
-        assert Mention.objects.filter(
-            mentioned_user=other_user
-        ).exists()
+        assert Mention.objects.filter(mentioned_user=other_user).exists()
 
     def test_filter_by_mention(
         self, authenticated_client, user, other_user, db
@@ -396,13 +361,10 @@ class TestMentionAPI:
         """Test filtering posts by mention"""
         # Create a post mentioning other_user
         post = Post.objects.create(
-            user=user,
-            content=f"Hello @{other_user.username}!"
+            user=user, content=f"Hello @{other_user.username}!"
         )
         Mention.objects.create(
-            post=post,
-            mentioned_user=other_user,
-            mentioner_user=user
+            post=post, mentioned_user=other_user, mentioner_user=user
         )
 
         response = authenticated_client.get(
@@ -416,10 +378,7 @@ class TestLikeAPI:
 
     def test_like_post(self, authenticated_client, post):
         """Test liking a post"""
-        response = authenticated_client.post(
-            "/api/likes/",
-            {"post": post.id}
-        )
+        response = authenticated_client.post("/api/likes/", {"post": post.id})
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_unlike_post(self, authenticated_client, post, user):
@@ -435,8 +394,7 @@ class TestFollowAPI:
     def test_follow_user(self, authenticated_client, other_user):
         """Test following a user"""
         response = authenticated_client.post(
-            "/api/follows/",
-            {"following": other_user.id}
+            "/api/follows/", {"following": other_user.id}
         )
         assert response.status_code == status.HTTP_201_CREATED
 
