@@ -196,7 +196,7 @@ function ComposeContent() {
                 onChange={(e) => setContent(e.target.value)}
                 maxLength={500}
                 disabled={posting}
-                className="min-h-30 resize-none"
+                className="min-h-[120px] resize-none"
                 autoFocus
               />
 
