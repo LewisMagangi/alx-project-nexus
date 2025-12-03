@@ -41,9 +41,7 @@ def test_join_community(client, user):
     url = f"/api/communities/{community.id}/join/"
     response = client.post(url)
     assert response.status_code == 200
-    assert CommunityMember.objects.filter(
-        user=user, community=community
-    ).exists()
+    assert CommunityMember.objects.filter(user=user, community=community).exists()
 
 
 def test_community_posts(authenticated_client, user):

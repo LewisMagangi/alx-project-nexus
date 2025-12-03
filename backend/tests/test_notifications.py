@@ -20,9 +20,7 @@ def client(user):
         "/api/auth/jwt/create/",
         {"username": "testuser", "password": "testpass"},
     )
-    assert (
-        response.status_code == 200
-    ), f"JWT obtain failed: {response.content}"
+    assert response.status_code == 200, f"JWT obtain failed: {response.content}"
     token = response.data["access"]
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
     return client
@@ -38,9 +36,7 @@ def test_list_notifications_authenticated(client, user, notification):
     response = client.get(url)
     assert response.status_code == 200
     notifications = (
-        response.data["results"]
-        if "results" in response.data
-        else response.data
+        response.data["results"] if "results" in response.data else response.data
     )
     assert any(n["verb"] == "liked your post" for n in notifications)
 

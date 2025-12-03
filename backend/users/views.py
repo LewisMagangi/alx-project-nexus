@@ -14,13 +14,13 @@ class UserListView(generics.ListAPIView):
 class UserDetailByUsernameView(generics.RetrieveAPIView):
     serializer_class = PublicUserSerializer
     permission_classes = [permissions.IsAuthenticated]
-    lookup_field = 'username'
+    lookup_field = "username"
 
     def get_queryset(self):
         return User.objects.all()
 
     def get_object(self):
-        username = self.kwargs.get('username')
+        username = self.kwargs.get("username")
         try:
             return User.objects.get(username=username)
         except User.DoesNotExist:
