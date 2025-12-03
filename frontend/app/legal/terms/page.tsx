@@ -36,11 +36,11 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
               <p className="mb-4">
-                By accessing or using Nexus (&quot;the Service&quot;), you agree to be bound by these Terms of Service 
+                By accessing or using Nexus (&quot;the Service&quot;), you agree to be bound by these Terms of Service
                 (&quot;Terms&quot;). If you do not agree to all the terms and conditions, you may not access or use the Service.
               </p>
               <p>
-                We reserve the right to update these Terms at any time. We will notify you of any material changes 
+                We reserve the right to update these Terms at any time. We will notify you of any material changes
                 by posting the new Terms on this page and updating the &quot;Last updated&quot; date.
               </p>
             </section>
@@ -78,7 +78,7 @@ export default function TermsPage() {
 
               <h3 className="text-xl font-medium text-gray-800 mb-3">3.2 Account Requirements</h3>
               <p className="mb-4">
-                You must be at least 13 years old to create an account. If you are under 18, you represent that you 
+                You must be at least 13 years old to create an account. If you are under 18, you represent that you
                 have your parent&apos;s or guardian&apos;s permission to use the Service.
               </p>
             </section>
@@ -104,7 +104,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. Content</h2>
               <h3 className="text-xl font-medium text-gray-800 mb-3">5.1 Your Content</h3>
               <p className="mb-4">
-                You retain ownership of content you post on Nexus. By posting content, you grant us a non-exclusive, 
+                You retain ownership of content you post on Nexus. By posting content, you grant us a non-exclusive,
                 worldwide, royalty-free license to use, copy, modify, and display your content in connection with the Service.
               </p>
 
@@ -120,7 +120,7 @@ export default function TermsPage() {
 
               <h3 className="text-xl font-medium text-gray-800 mb-3">5.3 Content Removal</h3>
               <p className="mb-4">
-                We may remove or restrict access to content that violates these Terms without prior notice. 
+                We may remove or restrict access to content that violates these Terms without prior notice.
                 Repeated violations may result in account suspension or termination.
               </p>
             </section>
@@ -128,12 +128,12 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Intellectual Property</h2>
               <p className="mb-4">
-                The Service and its original content (excluding user-generated content), features, and functionality 
-                are owned by Nexus and are protected by international copyright, trademark, patent, trade secret, 
+                The Service and its original content (excluding user-generated content), features, and functionality
+                are owned by Nexus and are protected by international copyright, trademark, patent, trade secret,
                 and other intellectual property laws.
               </p>
               <p>
-                The Nexus name, logo, and all related names, logos, product and service names, designs, and slogans 
+                The Nexus name, logo, and all related names, logos, product and service names, designs, and slogans
                 are trademarks of Nexus. You may not use such marks without our prior written permission.
               </p>
             </section>
@@ -142,7 +142,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Privacy</h2>
               <p className="mb-4">
                 Your privacy is important to us. Please review our{' '}
-                <Link href="/legal/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>, 
+                <Link href="/legal/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>,
                 which explains how we collect, use, and protect your information.
               </p>
             </section>
@@ -150,11 +150,11 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Termination</h2>
               <p className="mb-4">
-                We may terminate or suspend your account immediately, without prior notice or liability, for any reason, 
+                We may terminate or suspend your account immediately, without prior notice or liability, for any reason,
                 including if you breach these Terms. Upon termination, your right to use the Service will immediately cease.
               </p>
               <p>
-                You may delete your account at any time through the Settings page. Upon account deletion, 
+                You may delete your account at any time through the Settings page. Upon account deletion,
                 your profile and posts will be removed from public view.
               </p>
             </section>
@@ -162,8 +162,8 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Disclaimers</h2>
               <p className="mb-4">
-                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, 
-                EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, 
+                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND,
+                EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY,
                 FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
               </p>
               <p>
@@ -174,8 +174,8 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Limitation of Liability</h2>
               <p className="mb-4">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, NEXUS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, 
-                SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, 
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, NEXUS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+                SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA,
                 USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
               </p>
             </section>
@@ -183,7 +183,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">11. Governing Law</h2>
               <p className="mb-4">
-                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction 
+                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction
                 in which Nexus operates, without regard to its conflict of law provisions.
               </p>
             </section>
@@ -191,7 +191,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">12. Changes to Terms</h2>
               <p className="mb-4">
-                We reserve the right to modify or replace these Terms at any time. If a revision is material, 
+                We reserve the right to modify or replace these Terms at any time. If a revision is material,
                 we will provide at least 30 days&apos; notice before any new terms take effect.
               </p>
             </section>

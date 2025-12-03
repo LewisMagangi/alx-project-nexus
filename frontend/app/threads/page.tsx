@@ -25,12 +25,12 @@ function ThreadsContent() {
       setError('');
       const response = await postsAPI.getAll();
       const allPosts: Post[] = response.data.results || response.data || [];
-      
+
       // Filter posts that have likes (as a placeholder for replies)
-      const postsWithReplies = allPosts.filter(post => 
+      const postsWithReplies = allPosts.filter(post =>
         post.likes_count && post.likes_count > 0
       );
-      
+
       setThreads(postsWithReplies);
     } catch (err: unknown) {
       let message = 'Failed to load threads';

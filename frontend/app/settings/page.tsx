@@ -73,7 +73,7 @@ function SettingsContent() {
   // Fetch current profile data
   const fetchProfile = useCallback(async () => {
     if (!user?.username) return;
-    
+
     setProfileLoading(true);
     try {
       const response = await usersAPI.getByUsername(user.username);
@@ -142,7 +142,7 @@ function SettingsContent() {
         typeof err === 'string'
           ? err
           : (typeof err === 'object' && err !== null && 'response' in err)
-          ? (err as { response?: { data?: { error?: string; detail?: string } } }).response?.data?.error || 
+          ? (err as { response?: { data?: { error?: string; detail?: string } } }).response?.data?.error ||
             (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
           : undefined;
       setError(message || 'Failed to update profile');

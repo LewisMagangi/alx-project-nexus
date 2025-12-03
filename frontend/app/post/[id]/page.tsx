@@ -25,7 +25,7 @@ function PostDetailContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notFound, setNotFound] = useState(false);
-  
+
   // Reply state
   const [replyContent, setReplyContent] = useState('');
   const [replying, setReplying] = useState(false);
@@ -34,11 +34,11 @@ function PostDetailContent() {
   // Fetch the post
   const fetchPost = useCallback(async () => {
     if (!postId) return;
-    
+
     setLoading(true);
     setError('');
     setNotFound(false);
-    
+
     try {
       const response = await postsAPI.getById(parseInt(postId, 10));
       setPost(response.data);
@@ -59,7 +59,7 @@ function PostDetailContent() {
   // Fetch the thread (replies)
   const fetchThread = useCallback(async () => {
     if (!postId) return;
-    
+
     try {
       const response = await postsAPI.getThread(parseInt(postId, 10));
       // Thread response may be an array or have results property
@@ -168,9 +168,9 @@ function PostDetailContent() {
 
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-700">{error}</p>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="mt-2"
             onClick={handleRefresh}
           >
@@ -202,7 +202,7 @@ function PostDetailContent() {
       {/* Parent post reference (if this is a reply) */}
       {post.parent_post && (
         <div className="mb-4">
-          <Link 
+          <Link
             href={`/post/${post.parent_post}`}
             className="text-sm text-blue-600 hover:underline flex items-center gap-1"
           >
@@ -243,7 +243,7 @@ function PostDetailContent() {
               disabled={replying}
               className="min-h-[80px] resize-none"
             />
-            
+
             {replyError && (
               <p className="text-sm text-red-500">{replyError}</p>
             )}
@@ -252,8 +252,8 @@ function PostDetailContent() {
               <span className={`text-sm ${replyContent.length > 450 ? 'text-orange-500' : 'text-gray-500'}`}>
                 {replyContent.length}/500
               </span>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={replying || !replyContent.trim()}
                 size="sm"
               >
@@ -280,7 +280,7 @@ function PostDetailContent() {
           <MessageCircle className="h-5 w-5" />
           Replies ({thread.length})
         </h3>
-        
+
         {thread.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center text-gray-500">

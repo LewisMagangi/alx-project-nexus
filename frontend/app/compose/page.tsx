@@ -16,11 +16,11 @@ function ComposeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   useAuth();
-  
+
   // URL params
   const quoteId = searchParams.get('quote');
   const replyId = searchParams.get('reply');
-  
+
   // State
   const [content, setContent] = useState('');
   const [posting, setPosting] = useState(false);
@@ -33,7 +33,7 @@ function ComposeContent() {
   // Fetch the quoted post if quoteId is provided
   const fetchQuotedPost = useCallback(async () => {
     if (!quoteId) return;
-    
+
     setLoadingQuote(true);
     setQuoteNotFound(false);
     try {
@@ -51,7 +51,7 @@ function ComposeContent() {
   // Fetch the reply-to post if replyId is provided
   const fetchReplyToPost = useCallback(async () => {
     if (!replyId) return;
-    
+
     setLoadingQuote(true);
     try {
       const response = await postsAPI.getById(parseInt(replyId, 10));
@@ -75,7 +75,7 @@ function ComposeContent() {
 
     setPosting(true);
     setError('');
-    
+
     try {
       const postData: {
         content: string;
@@ -96,7 +96,7 @@ function ComposeContent() {
       }
 
       await postsAPI.create(postData);
-      
+
       // Redirect to dashboard after successful post
       router.push('/dashboard');
     } catch (err: unknown) {
@@ -168,8 +168,8 @@ function ComposeContent() {
         <Card>
           <CardHeader>
             <p className="text-gray-600">
-              {quoteId ? 'Add your thoughts to this quote tweet' : 
-               replyId ? 'Write your reply' : 
+              {quoteId ? 'Add your thoughts to this quote tweet' :
+               replyId ? 'Write your reply' :
                'What\'s on your mind?'}
             </p>
           </CardHeader>
@@ -239,16 +239,16 @@ function ComposeContent() {
                   {content.length}/500
                 </span>
                 <div className="flex gap-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => router.back()}
                     disabled={posting}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={posting || !content.trim()}
                   >
                     {posting ? (

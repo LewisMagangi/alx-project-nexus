@@ -64,7 +64,7 @@ export default function LegalPage() {
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Legal Center</h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Transparency and trust are at the core of Nexus. Review our policies to understand how we 
+              Transparency and trust are at the core of Nexus. Review our policies to understand how we
               protect your rights and handle your data.
             </p>
           </div>
@@ -72,8 +72,8 @@ export default function LegalPage() {
           {/* Legal Documents Grid */}
           <div className="grid gap-6 md:grid-cols-3 mb-12">
             {legalDocuments.map((doc) => (
-              <Link 
-                key={doc.href} 
+              <Link
+                key={doc.href}
                 href={doc.href}
                 className="group bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
@@ -98,8 +98,8 @@ export default function LegalPage() {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Agreement</h3>
             <p className="text-gray-600 mb-6">
-              By creating an account or using Nexus, you agree to our Terms of Service and acknowledge that 
-              you have read our Privacy Policy and Cookie Policy. We encourage you to review these documents 
+              By creating an account or using Nexus, you agree to our Terms of Service and acknowledge that
+              you have read our Privacy Policy and Cookie Policy. We encourage you to review these documents
               carefully before proceeding.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -122,8 +122,8 @@ export default function LegalPage() {
             <p className="text-gray-600 mb-4">
               If you have any questions about our policies, please don&apos;t hesitate to contact us.
             </p>
-            <a 
-              href="mailto:legal@nexus.social" 
+            <a
+              href="mailto:legal@nexus.social"
               className="text-blue-600 hover:underline font-medium"
             >
               legal@nexus.social

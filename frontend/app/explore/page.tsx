@@ -142,14 +142,14 @@ function ExploreContent() {
       {searchQuery && searchResults.users.length + searchResults.posts.length > 0 ? (
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 h-auto">
-            <TabsTrigger 
-              value="users" 
+            <TabsTrigger
+              value="users"
               className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
             >
               Users ({searchResults.users.length})
             </TabsTrigger>
-            <TabsTrigger 
-              value="posts" 
+            <TabsTrigger
+              value="posts"
               className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
             >
               Posts ({searchResults.posts.length})
@@ -217,14 +217,14 @@ function ExploreContent() {
       ) : (
         <Tabs defaultValue="posts" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 h-auto">
-            <TabsTrigger 
-              value="posts" 
+            <TabsTrigger
+              value="posts"
               className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
             >
               All Posts
             </TabsTrigger>
-            <TabsTrigger 
-              value="users" 
+            <TabsTrigger
+              value="users"
               className="touch-manipulation cursor-pointer hover:bg-gray-100 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 py-2.5 transition-colors"
             >
               Suggested Users

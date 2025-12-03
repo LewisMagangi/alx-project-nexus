@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           onClick={onClose}
         />
       )}
-      
+
       <aside
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg z-30 transform transition-all duration-300 ease-in-out border-r border-gray-200 ${
           isOpen ? 'w-72 translate-x-0' : 'w-0 -translate-x-full lg:w-0 pointer-events-none'

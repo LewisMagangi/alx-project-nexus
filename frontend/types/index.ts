@@ -53,7 +53,7 @@ export interface Post {
   // Rich content
   hashtags?: Array<{id: number; tag: string}>;
   mentions?: Array<{id: number; username: string}>;
-  
+
   // Metadata
   updated_at?: string;
   is_deleted?: boolean;

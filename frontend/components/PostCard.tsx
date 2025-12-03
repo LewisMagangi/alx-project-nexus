@@ -30,10 +30,10 @@ interface PostCardProps {
 // Helper function to render content with clickable hashtags and mentions
 function renderContentWithLinks(content: string): React.ReactNode {
   if (!content) return null;
-  
+
   // Regex to match hashtags and mentions
   const parts = content.split(/(#\w+|@\w+)/g);
-  
+
   return parts.map((part, index) => {
     if (part.startsWith('#')) {
       const tag = part.slice(1);
@@ -78,7 +78,7 @@ export default function PostCard({
   const [isRetweeted, setIsRetweeted] = useState<boolean>(!!post.is_retweeted_by_user);
   const [retweetCount, setRetweetCount] = useState<number>(post.retweet_count ?? 0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
+
   // Edit mode state
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editContent, setEditContent] = useState<string>(post.content ?? '');
@@ -86,23 +86,23 @@ export default function PostCard({
 
   // Determine the post owner's ID
   // Backend can return: user as number (ID), user as object {id, username}, or legacy user_id
-  const postOwnerId: number | undefined = 
-    typeof post.user === 'object' && post.user !== null 
-      ? post.user.id 
+  const postOwnerId: number | undefined =
+    typeof post.user === 'object' && post.user !== null
+      ? post.user.id
       : (post.user_id ?? post.user);
-  
+
   // Support both user_id and user object for compatibility
   const isOwnPost = currentUserId !== undefined && postOwnerId !== undefined && currentUserId === postOwnerId;
-  
+
   // Debug log - remove after confirming fix
-  console.log('PostCard Debug:', { 
-    postId: post.id, 
-    currentUserId, 
-    postUser: post.user, 
+  console.log('PostCard Debug:', {
+    postId: post.id,
+    currentUserId,
+    postUser: post.user,
     postUserId: post.user_id,
     postOwnerId,
     isOwnPost,
-    showActions 
+    showActions
   });
 
   const handleLike = async () => {
@@ -365,10 +365,10 @@ export default function PostCard({
           // Get the quoted post data from either retweet_of or retweet_of_data
           const quotedPost = post.retweet_of_data || (typeof post.retweet_of === 'object' ? post.retweet_of : null);
           if (!quotedPost) return null;
-          
-          const quotedUsername = quotedPost.username || 
+
+          const quotedUsername = quotedPost.username ||
             (typeof quotedPost.user === 'object' && quotedPost.user ? quotedPost.user.username : 'unknown');
-          
+
           return (
             <Link href={`/post/${quotedPost.id}`} className="block">
               <div className="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">

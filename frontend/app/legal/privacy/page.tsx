@@ -36,18 +36,18 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
               <p className="mb-4">
-                At Nexus, we are committed to protecting your privacy. This Privacy Policy explains how we collect, 
+                At Nexus, we are committed to protecting your privacy. This Privacy Policy explains how we collect,
                 use, disclose, and safeguard your information when you use our social networking platform.
               </p>
               <p>
-                Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, 
+                Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy,
                 please do not access the platform.
               </p>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Information We Collect</h2>
-              
+
               <h3 className="text-xl font-medium text-gray-800 mb-3">2.1 Information You Provide</h3>
               <p className="mb-4">We collect information that you voluntarily provide when you:</p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -93,10 +93,10 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Information Sharing</h2>
               <p className="mb-4">We may share your information in the following situations:</p>
-              
+
               <h3 className="text-xl font-medium text-gray-800 mb-3">4.1 Public Content</h3>
               <p className="mb-4">
-                Your posts, profile information, and interactions are public by default and can be seen by anyone. 
+                Your posts, profile information, and interactions are public by default and can be seen by anyone.
                 Your username, bio, and profile picture are always visible to other users.
               </p>
 
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
 
               <h3 className="text-xl font-medium text-gray-800 mb-3">4.4 Business Transfers</h3>
               <p>
-                If Nexus is involved in a merger, acquisition, or sale of assets, your information may be transferred 
+                If Nexus is involved in a merger, acquisition, or sale of assets, your information may be transferred
                 as part of that transaction.
               </p>
             </section>
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Data Retention</h2>
               <p className="mb-4">
-                We retain your information for as long as your account is active or as needed to provide services. 
+                We retain your information for as long as your account is active or as needed to provide services.
                 We may retain certain information after account deletion:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -181,8 +181,8 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Children&apos;s Privacy</h2>
               <p className="mb-4">
-                Nexus is not intended for children under 13 years of age. We do not knowingly collect personal 
-                information from children under 13. If you are a parent or guardian and believe your child has 
+                Nexus is not intended for children under 13 years of age. We do not knowingly collect personal
+                information from children under 13. If you are a parent or guardian and believe your child has
                 provided us with personal information, please contact us.
               </p>
             </section>
@@ -190,8 +190,8 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. International Data Transfers</h2>
               <p className="mb-4">
-                Your information may be transferred to and processed in countries other than your country of residence. 
-                These countries may have different data protection laws. We ensure appropriate safeguards are in place 
+                Your information may be transferred to and processed in countries other than your country of residence.
+                These countries may have different data protection laws. We ensure appropriate safeguards are in place
                 when transferring data internationally.
               </p>
             </section>
@@ -199,7 +199,7 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Cookies and Tracking</h2>
               <p className="mb-4">
-                We use cookies and similar tracking technologies to collect and track information. 
+                We use cookies and similar tracking technologies to collect and track information.
                 For more details, please see our{' '}
                 <Link href="/legal/cookies" className="text-blue-600 hover:underline">Cookie Policy</Link>.
               </p>
@@ -208,7 +208,7 @@ export default function PrivacyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">11. Changes to This Policy</h2>
               <p className="mb-4">
-                We may update this Privacy Policy from time to time. We will notify you of any material changes 
+                We may update this Privacy Policy from time to time. We will notify you of any material changes
                 by posting the new policy on this page and updating the &quot;Last updated&quot; date.
               </p>
             </section>

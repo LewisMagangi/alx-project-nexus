@@ -97,8 +97,8 @@ export default function EmailVerificationBanner() {
 
           {message && (
             <div className={`p-3 rounded-md text-sm ${
-              message.type === 'success' 
-                ? 'bg-green-100 text-green-800 border border-green-200' 
+              message.type === 'success'
+                ? 'bg-green-100 text-green-800 border border-green-200'
                 : 'bg-red-100 text-red-800 border border-red-200'
             }`}>
               {message.text}
@@ -135,10 +135,10 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">Settings</h1>
-      
+
       {/* Email Verification Status *\/}
       <EmailVerificationBanner />
-      
+
       {/* Rest of settings... *\/}
     </div>
   );
@@ -154,10 +154,10 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">Profile</h1>
-      
+
       {/* Email Verification Status *\/}
       <EmailVerificationBanner />
-      
+
       {/* Profile content... *\/}
     </div>
   );
@@ -174,7 +174,7 @@ export default function DashboardPage() {
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       {/* Show banner only if not verified *\/}
       <EmailVerificationBanner />
-      
+
       {/* Dashboard content... *\/}
     </div>
   );

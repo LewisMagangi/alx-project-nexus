@@ -35,12 +35,12 @@ function FollowsContent() {
     if (typeof error === 'string') return error;
     if (error instanceof Error) return error.message;
     const errObj = error as { response?: { data?: { message?: string; detail?: string; following?: string[] } } } | undefined;
-    
+
     // Check for DRF validation errors
     if (errObj?.response?.data?.detail) return errObj.response.data.detail;
     if (errObj?.response?.data?.following) return errObj.response.data.following[0];
     if (errObj?.response?.data?.message) return errObj.response.data.message;
-    
+
     return fallback;
   };
 
@@ -52,10 +52,10 @@ function FollowsContent() {
       ]);
 
       // Handle both paginated and array responses
-      const allFollows = Array.isArray(followsRes.data) 
-        ? followsRes.data 
+      const allFollows = Array.isArray(followsRes.data)
+        ? followsRes.data
         : (followsRes.data.results || []);
-      
+
       const allUsersData = Array.isArray(usersRes.data)
         ? usersRes.data
         : (usersRes.data.results || []);

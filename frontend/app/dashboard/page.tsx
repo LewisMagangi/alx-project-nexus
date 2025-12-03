@@ -109,9 +109,9 @@ function DashboardContent() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleRefresh}
               disabled={refreshing}
             >
@@ -135,7 +135,7 @@ function DashboardContent() {
                   disabled={posting}
                   className="min-h-[100px] resize-none"
                 />
-                
+
                 {/* Preview extracted hashtags and mentions */}
                 {(extractedHashtags.length > 0 || extractedMentions.length > 0) && (
                   <div className="flex flex-wrap gap-2 text-sm">
@@ -167,8 +167,8 @@ function DashboardContent() {
           {error && (
             <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
               {error}
-              <button 
-                onClick={() => setError('')} 
+              <button
+                onClick={() => setError('')}
                 className="ml-2 underline"
               >
                 Dismiss
