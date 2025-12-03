@@ -62,9 +62,7 @@ class PasswordChangeView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data["new_password"])
         request.user.save()
-        return Response(
-            {"detail": "Password changed"}, status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Password changed"}, status=status.HTTP_200_OK)
 
 
 class AccountDeleteView(generics.DestroyAPIView):
@@ -82,6 +80,4 @@ class AccountDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
-        return Response(
-            {"detail": "Account deactivated"}, status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Account deactivated"}, status=status.HTTP_200_OK)
