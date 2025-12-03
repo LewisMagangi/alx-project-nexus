@@ -6,9 +6,7 @@ from posts.models import Post
 class Bookmark(models.Model):
     """User bookmarks for posts"""
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="bookmarks"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmarks")
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="bookmarked_by"
     )
