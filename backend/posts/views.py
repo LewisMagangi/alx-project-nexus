@@ -96,19 +96,25 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = (
             Post.objects.filter(is_deleted=False)
             .select_related("user", "retweet_of__user", "parent_post__user")
-            .prefetch_related("post_hashtags__hashtag", "mentions__mentioned_user")
+            .prefetch_related(
+                "post_hashtags__hashtag", "mentions__mentioned_user"
+            )
         )
 
         # Filter by hashtag
         hashtag = self.request.query_params.get("hashtag")
         if hashtag:
             hashtag_normalized = Hashtag.normalize_tag(hashtag)
-            queryset = queryset.filter(post_hashtags__hashtag__tag=hashtag_normalized)
+            queryset = queryset.filter(
+                post_hashtags__hashtag__tag=hashtag_normalized
+            )
 
         # Filter by mention
         mention = self.request.query_params.get("mention")
         if mention:
-            queryset = queryset.filter(mentions__mentioned_user__username=mention)
+            queryset = queryset.filter(
+                mentions__mentioned_user__username=mention
+            )
 
         # Filter by user
         user_id = self.request.query_params.get("user_id")
@@ -145,7 +151,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if existing:
             return Response(
-                {"detail": "Already retweeted"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Already retweeted"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Create retweet
@@ -274,17 +281,20 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def home(self, request):
         """Get home feed - posts from followed users"""
-        following_ids = Follow.objects.filter(follower=request.user).values_list(
-            "following_id", flat=True
-        )
+        following_ids = Follow.objects.filter(
+            follower=request.user
+        ).values_list("following_id", flat=True)
 
         # Include user's own posts and posts from followed users
         posts = (
             Post.objects.filter(
-                user_id__in=list(following_ids) + [request.user.id], is_deleted=False
+                user_id__in=list(following_ids) + [request.user.id],
+                is_deleted=False,
             )
             .select_related("user", "retweet_of__user")
-            .prefetch_related("post_hashtags__hashtag", "mentions__mentioned_user")
+            .prefetch_related(
+                "post_hashtags__hashtag", "mentions__mentioned_user"
+            )
             .order_by("-created_at")[:50]
         )
 
@@ -296,7 +306,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Get all posts by a specific user",
         parameters=[
             OpenApiParameter(
-                name="user_id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="user_id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
         responses={200: PostSerializer(many=True)},
@@ -307,7 +319,9 @@ class PostViewSet(viewsets.ModelViewSet):
         posts = (
             Post.objects.filter(user_id=user_id, is_deleted=False)
             .select_related("user", "retweet_of__user")
-            .prefetch_related("post_hashtags__hashtag", "mentions__mentioned_user")
+            .prefetch_related(
+                "post_hashtags__hashtag", "mentions__mentioned_user"
+            )
             .order_by("-created_at")
         )
 
@@ -319,7 +333,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Get all posts containing a specific hashtag",
         parameters=[
             OpenApiParameter(
-                name="tag", type=OpenApiTypes.STR, location=OpenApiParameter.PATH
+                name="tag",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
             )
         ],
         responses={200: PostSerializer(many=True)},
@@ -334,7 +350,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 post_hashtags__hashtag__tag=tag_normalized, is_deleted=False
             )
             .select_related("user", "retweet_of__user")
-            .prefetch_related("post_hashtags__hashtag", "mentions__mentioned_user")
+            .prefetch_related(
+                "post_hashtags__hashtag", "mentions__mentioned_user"
+            )
             .distinct()
             .order_by("-created_at")
         )
@@ -347,12 +365,16 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Get all posts mentioning a specific username",
         parameters=[
             OpenApiParameter(
-                name="username", type=OpenApiTypes.STR, location=OpenApiParameter.PATH
+                name="username",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
             )
         ],
         responses={200: PostSerializer(many=True)},
     )
-    @action(detail=False, methods=["get"], url_path="mentions/(?P<username>[^/.]+)")
+    @action(
+        detail=False, methods=["get"], url_path="mentions/(?P<username>[^/.]+)"
+    )
     def by_mention(self, request, username=None):
         """Get posts mentioning a specific user"""
         posts = (
@@ -360,7 +382,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 mentions__mentioned_user__username=username, is_deleted=False
             )
             .select_related("user", "retweet_of__user")
-            .prefetch_related("post_hashtags__hashtag", "mentions__mentioned_user")
+            .prefetch_related(
+                "post_hashtags__hashtag", "mentions__mentioned_user"
+            )
             .distinct()
             .order_by("-created_at")
         )
@@ -383,7 +407,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Get a specific like by ID",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -392,7 +418,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Update a specific like",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -401,7 +429,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Partially update a specific like",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -410,7 +440,9 @@ class PostViewSet(viewsets.ModelViewSet):
         description="Remove a like from a post",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -464,7 +496,9 @@ class LikeViewSet(viewsets.ModelViewSet):
         description="Get a specific follow relationship by ID",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -473,7 +507,9 @@ class LikeViewSet(viewsets.ModelViewSet):
         description="Update a specific follow relationship",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -482,7 +518,9 @@ class LikeViewSet(viewsets.ModelViewSet):
         description="Partially update a specific follow relationship",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -491,7 +529,9 @@ class LikeViewSet(viewsets.ModelViewSet):
         description="Remove a follow relationship",
         parameters=[
             OpenApiParameter(
-                name="id", type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+                name="id",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
             )
         ],
     ),
@@ -503,9 +543,11 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Follow.objects.filter(follower=self.request.user).select_related(
-            "follower", "following"
-        ) | Follow.objects.filter(following=self.request.user).select_related(
+        return Follow.objects.filter(
+            follower=self.request.user
+        ).select_related("follower", "following") | Follow.objects.filter(
+            following=self.request.user
+        ).select_related(
             "follower", "following"
         )
 
@@ -569,9 +611,9 @@ class FollowViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def followers(self, request):
         """Get users following the current user"""
-        followers = Follow.objects.filter(following=request.user).select_related(
-            "follower"
-        )
+        followers = Follow.objects.filter(
+            following=request.user
+        ).select_related("follower")
 
         serializer = self.get_serializer(followers, many=True)
         return Response(serializer.data)
@@ -583,9 +625,9 @@ class FollowViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def following(self, request):
         """Get users the current user is following"""
-        following = Follow.objects.filter(follower=request.user).select_related(
-            "following"
-        )
+        following = Follow.objects.filter(
+            follower=request.user
+        ).select_related("following")
 
         serializer = self.get_serializer(following, many=True)
         return Response(serializer.data)

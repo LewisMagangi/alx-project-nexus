@@ -11,11 +11,10 @@ import random
 import re
 from datetime import timedelta
 
+from bookmarks.models import Bookmark
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-
-from bookmarks.models import Bookmark
 from notifications.models import Notification
 from posts.models import Follow, Hashtag, Like, Mention, Post, PostHashtag
 from usermessages.models import Message
@@ -33,14 +32,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Add command line arguments."""
         parser.add_argument(
-            '--clear',
-            action='store_true',
-            help='Clear all existing data before seeding',
+            "--clear",
+            action="store_true",
+            help="Clear all existing data before seeding",
         )
 
     def handle(self, *args, **options):
         """Main command handler."""
-        if options['clear']:
+        if options["clear"]:
             self.stdout.write(self.style.WARNING("Clearing existing data..."))
             self._clear_data()
 
@@ -117,7 +116,7 @@ class Command(BaseCommand):
                     ),
                     "location": "San Francisco, CA",
                     "website": "https://techguru.dev",
-                }
+                },
             },
             {
                 "username": "foodie_adventures",
@@ -130,7 +129,7 @@ class Command(BaseCommand):
                     ),
                     "location": "New York, NY",
                     "website": "https://foodieadventures.blog",
-                }
+                },
             },
             {
                 "username": "fitness_coach",
@@ -143,7 +142,7 @@ class Command(BaseCommand):
                     ),
                     "location": "Los Angeles, CA",
                     "website": "https://fitcoach.com",
-                }
+                },
             },
             {
                 "username": "travel_nomad",
@@ -156,7 +155,7 @@ class Command(BaseCommand):
                     ),
                     "location": "Currently in Bali",
                     "website": "https://travelnomad.world",
-                }
+                },
             },
             {
                 "username": "book_worm",
@@ -168,7 +167,7 @@ class Command(BaseCommand):
                         "and literary discussions. Currently reading sci-fi."
                     ),
                     "location": "London, UK",
-                }
+                },
             },
             {
                 "username": "music_maven",
@@ -181,7 +180,7 @@ class Command(BaseCommand):
                     ),
                     "location": "Berlin, Germany",
                     "website": "https://soundcloud.com/musicmaven",
-                }
+                },
             },
             {
                 "username": "art_creator",
@@ -194,7 +193,7 @@ class Command(BaseCommand):
                     ),
                     "location": "Tokyo, Japan",
                     "website": "https://artstation.com/artcreator",
-                }
+                },
             },
             {
                 "username": "news_reporter",
@@ -206,7 +205,7 @@ class Command(BaseCommand):
                         "reporting. Retweets ≠ endorsements."
                     ),
                     "location": "Washington, DC",
-                }
+                },
             },
             {
                 "username": "crypto_trader",
@@ -219,7 +218,7 @@ class Command(BaseCommand):
                     ),
                     "location": "Singapore",
                     "website": "https://cryptoinsights.io",
-                }
+                },
             },
             {
                 "username": "science_daily",
@@ -231,7 +230,7 @@ class Command(BaseCommand):
                         "exploration, and technology."
                     ),
                     "location": "Boston, MA",
-                }
+                },
             },
         ]
 
@@ -240,7 +239,7 @@ class Command(BaseCommand):
                 username=user_data["username"],
                 defaults={
                     "email": user_data["email"],
-                }
+                },
             )
             if created:
                 user.set_password(user_data["password"])
@@ -253,7 +252,7 @@ class Command(BaseCommand):
                     "bio": profile_data.get("bio", ""),
                     "location": profile_data.get("location", ""),
                     "website": profile_data.get("website", ""),
-                }
+                },
             )
             # If profile already exists, update fields
             if not _:
@@ -271,18 +270,20 @@ class Command(BaseCommand):
 
         # Strategy: Create clusters of mutual interests
         tech_cluster = [
-            u for u in users
-            if u.username in ['tech_guru', 'crypto_trader', 'science_daily']
+            u
+            for u in users
+            if u.username in ["tech_guru", "crypto_trader", "science_daily"]
         ]
         creative_cluster = [
-            u for u in users
-            if u.username in ['art_creator', 'music_maven', 'book_worm']
+            u
+            for u in users
+            if u.username in ["art_creator", "music_maven", "book_worm"]
         ]
         lifestyle_cluster = [
-            u for u in users
-            if u.username in [
-                'foodie_adventures', 'travel_nomad', 'fitness_coach'
-            ]
+            u
+            for u in users
+            if u.username
+            in ["foodie_adventures", "travel_nomad", "fitness_coach"]
         ]
 
         clusters = [tech_cluster, creative_cluster, lifestyle_cluster]
@@ -294,12 +295,10 @@ class Command(BaseCommand):
                     # 80% follow rate within cluster
                     if user1 != user2 and random.random() > 0.2:
                         if not Follow.objects.filter(
-                            follower=user1,
-                            following=user2
+                            follower=user1, following=user2
                         ).exists():
                             follow = Follow.objects.create(
-                                follower=user1,
-                                following=user2
+                                follower=user1, following=user2
                             )
                             follows.append(follow)
 
@@ -317,18 +316,15 @@ class Command(BaseCommand):
             others = [u for u in users if u != user]
             num_follows = random.randint(2, 5)
             follows_to_create = random.sample(
-                others,
-                min(num_follows, len(others))
+                others, min(num_follows, len(others))
             )
 
             for to_follow in follows_to_create:
                 if not Follow.objects.filter(
-                    follower=user,
-                    following=to_follow
+                    follower=user, following=to_follow
                 ).exists():
                     follow = Follow.objects.create(
-                        follower=user,
-                        following=to_follow
+                        follower=user, following=to_follow
                     )
                     follows.append(follow)
 
@@ -342,172 +338,169 @@ class Command(BaseCommand):
             (
                 "Just deployed my new #Python web app using #Django and "
                 "#React! Check it out 🚀",
-                "tech_guru"
+                "tech_guru",
             ),
             (
                 "Working on a new #MachineLearning model for image "
                 "classification. The results are promising! #AI "
                 "#DeepLearning",
-                "tech_guru"
+                "tech_guru",
             ),
             (
                 "Why #TypeScript is a game changer for large-scale "
                 "JavaScript projects. Thread 🧵",
-                "tech_guru"
+                "tech_guru",
             ),
             # Food posts with mentions and hashtags
             (
                 "Had the most amazing pasta today! The carbonara was "
                 "perfection 🍝 #FoodieLife",
-                "foodie_adventures"
+                "foodie_adventures",
             ),
             (
                 "Recipe of the day: Homemade sourdough bread! Tag "
                 "@book_worm who loves baking 🍞 #BakingFromScratch",
-                "foodie_adventures"
+                "foodie_adventures",
             ),
             (
                 "Coffee tasting at the new cafe downtown. Best latte "
                 "I've had! ☕ #CoffeeLover",
-                "foodie_adventures"
+                "foodie_adventures",
             ),
             # Fitness posts with hashtags
             (
                 "Morning workout complete! 5K run + strength training 💪 "
                 "#FitnessMotivation #HealthyLifestyle",
-                "fitness_coach"
+                "fitness_coach",
             ),
             (
                 "New blog post: Top 10 exercises for building core "
                 "strength. Link in bio! #Fitness #Workout",
-                "fitness_coach"
+                "fitness_coach",
             ),
             (
                 "Remember: consistency > intensity. Small daily "
                 "improvements lead to big results! #FitnessJourney",
-                "fitness_coach"
+                "fitness_coach",
             ),
             # Travel posts with hashtags and mentions
             (
                 "Sunset at Uluwatu Temple, Bali 🌅 Simply breathtaking! "
                 "@travel_nomad #TravelPhotography #Bali",
-                "travel_nomad"
+                "travel_nomad",
             ),
             (
                 "Pro tip: Visit temples early morning to avoid crowds "
                 "and catch the sunrise! #TravelTips",
-                "travel_nomad"
+                "travel_nomad",
             ),
             (
                 "Next destination: Japan 🇯🇵 Can't wait to explore "
                 "Tokyo! Any recommendations @art_creator? #TravelPlanning",
-                "travel_nomad"
+                "travel_nomad",
             ),
             # Book posts with hashtags
             (
                 "Just finished 'Project Hail Mary' by Andy Weir. What "
                 "a ride! 📚 #BookReview #SciFi",
-                "book_worm"
+                "book_worm",
             ),
             (
                 "Currently reading list: 5 sci-fi novels that will blow "
                 "your mind 🤯 #BookRecommendations",
-                "book_worm"
+                "book_worm",
             ),
             (
                 "Book club meeting tonight! Discussing '1984'. "
                 "@news_reporter you should join us! #BookClub",
-                "book_worm"
+                "book_worm",
             ),
             # Music posts with hashtags
             (
                 "New track out now! 'Midnight Dreams' - lo-fi beats for "
                 "studying 🎵 #LoFi #ChillBeats",
-                "music_maven"
+                "music_maven",
             ),
             (
                 "Working on a new EP. Here's a sneak peek of the first "
                 "track 🎧 #MusicProduction",
-                "music_maven"
+                "music_maven",
             ),
             (
                 "The theory behind chord progressions in electronic "
                 "music. Thread 🧵 #MusicTheory",
-                "music_maven"
+                "music_maven",
             ),
             # Art posts with hashtags
             (
                 "Latest digital painting: 'Cyberpunk Cityscape' 🎨 "
                 "#DigitalArt #NFT",
-                "art_creator"
+                "art_creator",
             ),
             (
                 "Commission work is now open! DM for details and pricing "
                 "💼 #ArtCommissions",
-                "art_creator"
+                "art_creator",
             ),
             (
                 "Tutorial: How to create realistic lighting in digital "
                 "paintings #ArtTutorial",
-                "art_creator"
+                "art_creator",
             ),
             # News posts with hashtags
             (
                 "Breaking: New climate report shows significant changes. "
                 "Full coverage at 6PM 📰 #ClimateChange #News",
-                "news_reporter"
+                "news_reporter",
             ),
             (
                 "Investigative piece on tech industry practices published "
                 "today. Thread 🧵 #Journalism",
-                "news_reporter"
+                "news_reporter",
             ),
             (
                 "Important update on the ongoing situation. Stay tuned "
                 "for developments. #BreakingNews",
-                "news_reporter"
+                "news_reporter",
             ),
             # Crypto posts with hashtags
             (
                 "Bitcoin breaks $50K! Analysis and market outlook 📈 "
                 "#Bitcoin #Crypto",
-                "crypto_trader"
+                "crypto_trader",
             ),
             (
                 "Understanding DeFi: A beginner's guide to decentralized "
                 "finance #DeFi #Blockchain",
-                "crypto_trader"
+                "crypto_trader",
             ),
             (
                 "Warning: Watch out for these common crypto scams. Stay "
                 "safe! ⚠️ #CryptoSafety",
-                "crypto_trader"
+                "crypto_trader",
             ),
             # Science posts with hashtags
             (
                 "New exoplanet discovered in habitable zone! 🪐 "
                 "#SpaceExploration #Astronomy",
-                "science_daily"
+                "science_daily",
             ),
             (
                 "Study shows promising results in cancer treatment "
                 "research 🔬 #MedicalResearch",
-                "science_daily"
+                "science_daily",
             ),
             (
                 "The James Webb telescope captures stunning new images "
                 "🌌 #JWST #Space",
-                "science_daily"
+                "science_daily",
             ),
         ]
 
         for content, username in posts_templates:
             try:
                 user = next(u for u in users if u.username == username)
-                post = Post.objects.create(
-                    user=user,
-                    content=content
-                )
+                post = Post.objects.create(user=user, content=content)
                 posts.append(post)
 
                 # Extract and create hashtags
@@ -523,7 +516,7 @@ class Command(BaseCommand):
 
     def _process_hashtags(self, post, content):
         """Extract hashtags from content and create relationships."""
-        hashtag_pattern = r'#(\w+)'
+        hashtag_pattern = r"#(\w+)"
         hashtags = re.findall(hashtag_pattern, content)
 
         for tag_text in hashtags:
@@ -536,14 +529,11 @@ class Command(BaseCommand):
                 hashtag.last_used_at = timezone.now()
                 hashtag.save()
 
-            PostHashtag.objects.get_or_create(
-                post=post,
-                hashtag=hashtag
-            )
+            PostHashtag.objects.get_or_create(post=post, hashtag=hashtag)
 
     def _process_mentions(self, post, content, users):
         """Extract mentions from content and create relationships."""
-        mention_pattern = r'@(\w+)'
+        mention_pattern = r"@(\w+)"
         mentions = re.findall(mention_pattern, content)
 
         for username in mentions:
@@ -554,7 +544,7 @@ class Command(BaseCommand):
                 Mention.objects.get_or_create(
                     post=post,
                     mentioned_user=mentioned_user,
-                    mentioner_user=post.user
+                    mentioner_user=post.user,
                 )
 
                 # Create notification for mention
@@ -563,7 +553,7 @@ class Command(BaseCommand):
                     actor=post.user,
                     verb="mentioned you in a post",
                     target_type="post",
-                    target_id=post.id
+                    target_id=post.id,
                 )
             except StopIteration:
                 continue
@@ -586,22 +576,23 @@ class Command(BaseCommand):
                 reply_user = random.choice(
                     [u for u in users if u != root_post.user]
                 )
-                reply_content = random.choice([
-                    "Great post! I totally agree with your perspective.",
-                    "Interesting take. I have a slightly different view.",
-                    "Thanks for sharing this! Very informative.",
-                    "This is exactly what I needed to read today.",
-                    "Could you elaborate more on this point?",
-                ])
+                reply_content = random.choice(
+                    [
+                        "Great post! I totally agree with your perspective.",
+                        "Interesting take. I have a slightly different view.",
+                        "Thanks for sharing this! Very informative.",
+                        "This is exactly what I needed to read today.",
+                        "Could you elaborate more on this point?",
+                    ]
+                )
 
                 reply = Post.objects.create(
                     user=reply_user,
                     content=reply_content,
                     parent_post=root_post,
                     root_post=root_post,
-                    created_at=root_post.created_at + timedelta(
-                        hours=random.randint(1, 12)
-                    )
+                    created_at=root_post.created_at
+                    + timedelta(hours=random.randint(1, 12)),
                 )
                 first_level_replies.append(reply)
                 thread_posts.append(reply)
@@ -612,7 +603,7 @@ class Command(BaseCommand):
                     actor=reply_user,
                     verb="replied to your post",
                     target_type="post",
-                    target_id=root_post.id
+                    target_id=root_post.id,
                 )
 
             # Create nested replies (replies to replies)
@@ -621,21 +612,22 @@ class Command(BaseCommand):
                     nested_reply_user = random.choice(
                         [u for u in users if u != first_reply.user]
                     )
-                    nested_content = random.choice([
-                        "I second this!",
-                        "Building on your point...",
-                        "Great addition to the discussion!",
-                        "This makes a lot of sense.",
-                    ])
+                    nested_content = random.choice(
+                        [
+                            "I second this!",
+                            "Building on your point...",
+                            "Great addition to the discussion!",
+                            "This makes a lot of sense.",
+                        ]
+                    )
 
                     nested_reply = Post.objects.create(
                         user=nested_reply_user,
                         content=nested_content,
                         parent_post=first_reply,
                         root_post=root_post,
-                        created_at=first_reply.created_at + timedelta(
-                            hours=random.randint(1, 6)
-                        )
+                        created_at=first_reply.created_at
+                        + timedelta(hours=random.randint(1, 6)),
                     )
                     thread_posts.append(nested_reply)
 
@@ -645,7 +637,7 @@ class Command(BaseCommand):
                         actor=nested_reply_user,
                         verb="replied to your comment",
                         target_type="post",
-                        target_id=first_reply.id
+                        target_id=first_reply.id,
                     )
 
         return thread_posts
@@ -662,23 +654,22 @@ class Command(BaseCommand):
             num_retweets = random.randint(2, 5)
             retweeters = random.sample(
                 [u for u in users if u != original_post.user],
-                min(num_retweets, len(users) - 1)
+                min(num_retweets, len(users) - 1),
             )
             for retweeter in retweeters:
                 # Check if already retweeted
                 if not Post.objects.filter(
                     user=retweeter,
                     retweet_of=original_post,
-                    is_quote_tweet=False
+                    is_quote_tweet=False,
                 ).exists():
                     retweet = Post.objects.create(
                         user=retweeter,
                         content="",
                         retweet_of=original_post,
                         is_quote_tweet=False,
-                        created_at=original_post.created_at + timedelta(
-                            hours=random.randint(1, 48)
-                        )
+                        created_at=original_post.created_at
+                        + timedelta(hours=random.randint(1, 48)),
                     )
                     retweets.append(retweet)
 
@@ -688,7 +679,7 @@ class Command(BaseCommand):
                         actor=retweeter,
                         verb="retweeted your post",
                         target_type="post",
-                        target_id=original_post.id
+                        target_id=original_post.id,
                     )
 
         return retweets
@@ -715,7 +706,7 @@ class Command(BaseCommand):
             num_quotes = random.randint(1, 3)
             quoters = random.sample(
                 [u for u in users if u != original_post.user],
-                min(num_quotes, len(users) - 1)
+                min(num_quotes, len(users) - 1),
             )
 
             for quoter in quoters:
@@ -726,9 +717,8 @@ class Command(BaseCommand):
                     content=quote_content,
                     retweet_of=original_post,
                     is_quote_tweet=True,
-                    created_at=original_post.created_at + timedelta(
-                        hours=random.randint(1, 72)
-                    )
+                    created_at=original_post.created_at
+                    + timedelta(hours=random.randint(1, 72)),
                 )
                 quote_tweets.append(quote_tweet)
 
@@ -742,7 +732,7 @@ class Command(BaseCommand):
                     actor=quoter,
                     verb="quoted your post",
                     target_type="post",
-                    target_id=original_post.id
+                    target_id=original_post.id,
                 )
 
         return quote_tweets
@@ -755,20 +745,17 @@ class Command(BaseCommand):
             # Popular posts get more likes
             base_likes = random.randint(2, 8)
             num_likes = (
-                base_likes if random.random() > 0.3
-                else random.randint(8, 15)
+                base_likes if random.random() > 0.3 else random.randint(8, 15)
             )
 
             potential_likers = [u for u in users if u != post.user]
             likers = random.sample(
-                potential_likers,
-                min(num_likes, len(potential_likers))
+                potential_likers, min(num_likes, len(potential_likers))
             )
 
             for liker in likers:
                 like, created = Like.objects.get_or_create(
-                    user=liker,
-                    post=post
+                    user=liker, post=post
                 )
                 if created:
                     likes.append(like)
@@ -780,7 +767,7 @@ class Command(BaseCommand):
                             actor=liker,
                             verb="liked your post",
                             target_type="post",
-                            target_id=post.id
+                            target_id=post.id,
                         )
 
         return likes
@@ -793,14 +780,12 @@ class Command(BaseCommand):
             # Each user bookmarks 3-7 posts
             num_bookmarks = random.randint(3, 7)
             posts_to_bookmark = random.sample(
-                posts,
-                min(num_bookmarks, len(posts))
+                posts, min(num_bookmarks, len(posts))
             )
 
             for post in posts_to_bookmark:
                 bookmark, created = Bookmark.objects.get_or_create(
-                    user=user,
-                    post=post
+                    user=user, post=post
                 )
                 if created:
                     bookmarks.append(bookmark)
@@ -832,9 +817,8 @@ class Command(BaseCommand):
                 receiver=receiver,
                 content=content,
                 is_read=random.choice([True, False]),
-                created_at=timezone.now() - timedelta(
-                    days=random.randint(1, 30)
-                )
+                created_at=timezone.now()
+                - timedelta(days=random.randint(1, 30)),
             )
             messages.append(message)
 
@@ -852,22 +836,23 @@ class Command(BaseCommand):
         summary_data = [
             ("Users", User.objects.filter(is_superuser=False).count()),
             ("User Profiles", UserProfile.objects.count()),
-            ("Regular Posts", Post.objects.filter(
-                parent_post__isnull=True,
-                retweet_of__isnull=True
-            ).count()),
+            (
+                "Regular Posts",
+                Post.objects.filter(
+                    parent_post__isnull=True, retweet_of__isnull=True
+                ).count(),
+            ),
             (
                 "Reply Posts",
-                Post.objects.filter(parent_post__isnull=False).count()
+                Post.objects.filter(parent_post__isnull=False).count(),
             ),
-            ("Retweets", Post.objects.filter(
-                retweet_of__isnull=False,
-                is_quote_tweet=False
-            ).count()),
             (
-                "Quote Tweets",
-                Post.objects.filter(is_quote_tweet=True).count()
+                "Retweets",
+                Post.objects.filter(
+                    retweet_of__isnull=False, is_quote_tweet=False
+                ).count(),
             ),
+            ("Quote Tweets", Post.objects.filter(is_quote_tweet=True).count()),
             ("Total Posts", Post.objects.count()),
             ("Hashtags", Hashtag.objects.count()),
             ("Post-Hashtag Links", PostHashtag.objects.count()),
@@ -884,7 +869,7 @@ class Command(BaseCommand):
 
         # Display trending hashtags
         self.stdout.write("\n🔥 Top Trending Hashtags:\n")
-        top_hashtags = Hashtag.objects.order_by('-use_count')[:10]
+        top_hashtags = Hashtag.objects.order_by("-use_count")[:10]
         for hashtag in top_hashtags:
             self.stdout.write(
                 f"  #{hashtag.tag:<20} ({hashtag.use_count} uses)"
@@ -902,7 +887,5 @@ class Command(BaseCommand):
         )
         self.stdout.write("=" * 70)
         self.stdout.write("\n💡 Test credentials:")
-        self.stdout.write(
-            "  Username: tech_guru (or any user from the list)"
-        )
+        self.stdout.write("  Username: tech_guru (or any user from the list)")
         self.stdout.write("  Password: password123\n")

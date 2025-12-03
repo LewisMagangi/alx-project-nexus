@@ -15,7 +15,9 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        accepted_legal_policies = validated_data.pop("accepted_legal_policies", False)
+        accepted_legal_policies = validated_data.pop(
+            "accepted_legal_policies", False
+        )
         if not accepted_legal_policies:
             raise serializers.ValidationError(
                 {"error": "You must accept the legal policies to register."}
@@ -41,7 +43,9 @@ class CustomLoginSerializer(serializers.Serializer):
         if not user:
             try:
                 user_obj = User.objects.get(email=username_or_email)
-                user = authenticate(username=user_obj.username, password=password)
+                user = authenticate(
+                    username=user_obj.username, password=password
+                )
             except User.DoesNotExist:
                 pass
 

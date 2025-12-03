@@ -34,7 +34,9 @@ class CommunityPostsView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return CommunityPost.objects.filter(community_id=self.kwargs["community_id"])
+        return CommunityPost.objects.filter(
+            community_id=self.kwargs["community_id"]
+        )
 
     def perform_create(self, serializer):
         serializer.save(

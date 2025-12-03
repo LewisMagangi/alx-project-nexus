@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 import dj_database_url
+from dotenv import load_dotenv
 
 # Load frontend URL from environment
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
@@ -143,7 +143,9 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = (
+    "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+)
 
 # These should match your deployment URLs
 SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL = os.getenv("GOOGLE_REDIRECT_URI")
@@ -154,8 +156,12 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.LimitOffsetPagination"),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.LimitOffsetPagination"
+    ),
     "PAGE_SIZE": 20,
 }
 
@@ -221,13 +227,16 @@ AUTH_PASSWORD_VALIDATORS = [
         "UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation." "MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation." "CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation." "NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+        "NumericPasswordValidator",
     },
 ]
 
@@ -250,7 +259,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Use WhiteNoise for static file serving in production
 if IS_PRODUCTION:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    STATICFILES_STORAGE = (
+        "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    )
 
 
 # Default primary key field type
@@ -262,7 +273,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS configuration
 _cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
 if _cors_origins:
-    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(",") if o.strip()]
+    CORS_ALLOWED_ORIGINS = [
+        o.strip() for o in _cors_origins.split(",") if o.strip()
+    ]
 elif IS_PRODUCTION:
     # In production, CORS must be explicitly configured
     CORS_ALLOWED_ORIGINS = []
@@ -278,7 +291,9 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF configuration
 _csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 if _csrf_origins:
-    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
+    CSRF_TRUSTED_ORIGINS = [
+        o.strip() for o in _csrf_origins.split(",") if o.strip()
+    ]
 elif IS_PRODUCTION:
     # Production defaults for common hosting platforms
     CSRF_TRUSTED_ORIGINS = [

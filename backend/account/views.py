@@ -3,8 +3,8 @@ from rest_framework.response import Response
 
 from .serializers import (
     AccountSerializer,
-    EmptySerializer,
     CustomPasswordChangeSerializer,
+    EmptySerializer,
     ProfileUpdateSerializer,
 )
 
@@ -28,21 +28,27 @@ class ProfileUpdateView(generics.UpdateAPIView):
     def get_object(self):
         # Get or create the user's profile
         from users.models import UserProfile
+
         profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
         return profile
-    
+
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        
+
         # Return the updated profile data
-        return Response({
-            "detail": "Profile updated successfully",
-            "profile": serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "detail": "Profile updated successfully",
+                "profile": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class PasswordChangeView(generics.UpdateAPIView):
@@ -62,7 +68,9 @@ class PasswordChangeView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data["new_password"])
         request.user.save()
-        return Response({"detail": "Password changed"}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Password changed"}, status=status.HTTP_200_OK
+        )
 
 
 class AccountDeleteView(generics.DestroyAPIView):
@@ -80,4 +88,6 @@ class AccountDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
-        return Response({"detail": "Account deactivated"}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Account deactivated"}, status=status.HTTP_200_OK
+        )

@@ -33,7 +33,9 @@ def user(db):
 def other_user(db):
     """Create another test user"""
     return User.objects.create_user(
-        username="otheruser", email="other@example.com", password="otherpass123"
+        username="otheruser",
+        email="other@example.com",
+        password="otherpass123",
     )
 
 
@@ -89,7 +91,9 @@ class TestPostModel:
 
     def test_nested_replies_set_root(self, db, user, post):
         """Test that nested replies correctly set root_post"""
-        reply1 = Post.objects.create(user=user, content="First reply", parent_post=post)
+        reply1 = Post.objects.create(
+            user=user, content="First reply", parent_post=post
+        )
         reply2 = Post.objects.create(
             user=user, content="Reply to reply", parent_post=reply1
         )
@@ -97,7 +101,9 @@ class TestPostModel:
 
     def test_retweet_properties(self, db, user, other_user, post):
         """Test retweet is_retweet property"""
-        retweet = Post.objects.create(user=other_user, content="", retweet_of=post)
+        retweet = Post.objects.create(
+            user=other_user, content="", retweet_of=post
+        )
         assert retweet.is_retweet
         assert not retweet.is_quote_tweet
 
@@ -181,7 +187,9 @@ class TestSignals:
 
     def test_reply_count_decrements(self, db, user, post):
         """Test that reply_count decrements on reply deletion"""
-        reply = Post.objects.create(user=user, content="Reply", parent_post=post)
+        reply = Post.objects.create(
+            user=user, content="Reply", parent_post=post
+        )
         post.refresh_from_db()
         initial_count = post.reply_count
         reply.delete()
@@ -239,7 +247,8 @@ class TestPostAPI:
     def test_create_reply(self, authenticated_client, post):
         """Test creating a reply via API"""
         response = authenticated_client.post(
-            "/api/posts/", {"content": "This is a reply", "parent_post": post.id}
+            "/api/posts/",
+            {"content": "This is a reply", "parent_post": post.id},
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["parent_post"] == post.id
@@ -279,12 +288,16 @@ class TestRetweetAPI:
     def test_unretweet(self, authenticated_client, post, user):
         """Test unretweeting a post"""
         authenticated_client.post(f"/api/posts/{post.id}/retweet/")
-        response = authenticated_client.post(f"/api/posts/{post.id}/unretweet/")
+        response = authenticated_client.post(
+            f"/api/posts/{post.id}/unretweet/"
+        )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_unretweet_not_retweeted(self, authenticated_client, post):
         """Test unretweeting when not retweeted fails"""
-        response = authenticated_client.post(f"/api/posts/{post.id}/unretweet/")
+        response = authenticated_client.post(
+            f"/api/posts/{post.id}/unretweet/"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -294,8 +307,12 @@ class TestThreadAPI:
     def test_get_thread(self, authenticated_client, post, user):
         """Test getting a thread"""
         # Create replies
-        reply1 = Post.objects.create(user=user, content="Reply 1", parent_post=post)
-        reply2 = Post.objects.create(user=user, content="Reply 2", parent_post=reply1)
+        reply1 = Post.objects.create(
+            user=user, content="Reply 1", parent_post=post
+        )
+        reply2 = Post.objects.create(
+            user=user, content="Reply 2", parent_post=reply1
+        )
 
         response = authenticated_client.get(f"/api/posts/{post.id}/thread/")
         assert response.status_code == status.HTTP_200_OK
@@ -338,10 +355,14 @@ class TestMentionAPI:
         # Check mention was created
         assert Mention.objects.filter(mentioned_user=other_user).exists()
 
-    def test_filter_by_mention(self, authenticated_client, user, other_user, db):
+    def test_filter_by_mention(
+        self, authenticated_client, user, other_user, db
+    ):
         """Test filtering posts by mention"""
         # Create a post mentioning other_user
-        post = Post.objects.create(user=user, content=f"Hello @{other_user.username}!")
+        post = Post.objects.create(
+            user=user, content=f"Hello @{other_user.username}!"
+        )
         Mention.objects.create(
             post=post, mentioned_user=other_user, mentioner_user=user
         )

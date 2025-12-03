@@ -56,7 +56,9 @@ class TestBookmarks:
 
         assert response.status_code == 200
         bookmarks = (
-            response.data["results"] if "results" in response.data else response.data
+            response.data["results"]
+            if "results" in response.data
+            else response.data
         )
         assert len(bookmarks) == 1
         assert bookmarks[0]["post"]["id"] == self.post.id
@@ -86,7 +88,9 @@ class TestBookmarks:
 
         assert response.status_code == 200
         bookmarks = (
-            response.data["results"] if "results" in response.data else response.data
+            response.data["results"]
+            if "results" in response.data
+            else response.data
         )
         assert len(bookmarks) == 0
 

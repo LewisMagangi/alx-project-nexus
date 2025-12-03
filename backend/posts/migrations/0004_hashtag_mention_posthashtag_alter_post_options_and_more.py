@@ -25,7 +25,12 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("tag", models.CharField(db_index=True, max_length=100, unique=True)),
+                (
+                    "tag",
+                    models.CharField(
+                        db_index=True, max_length=100, unique=True
+                    ),
+                ),
                 ("use_count", models.IntegerField(default=0)),
                 ("last_used_at", models.DateTimeField(auto_now=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -150,12 +155,15 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="like",
             index=models.Index(
-                fields=["post", "created_at"], name="posts_like_post_id_425a42_idx"
+                fields=["post", "created_at"],
+                name="posts_like_post_id_425a42_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="like",
-            index=models.Index(fields=["user"], name="posts_like_user_id_842d1b_idx"),
+            index=models.Index(
+                fields=["user"], name="posts_like_user_id_842d1b_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="post",
@@ -172,7 +180,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="post",
             index=models.Index(
-                fields=["retweet_of", "user"], name="posts_post_retweet_fa702a_idx"
+                fields=["retweet_of", "user"],
+                name="posts_post_retweet_fa702a_idx",
             ),
         ),
         migrations.AddIndex(
@@ -191,12 +200,15 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="post",
             index=models.Index(
-                fields=["root_post", "created_at"], name="posts_post_root_po_979633_idx"
+                fields=["root_post", "created_at"],
+                name="posts_post_root_po_979633_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="hashtag",
-            index=models.Index(fields=["tag"], name="posts_hasht_tag_7a6858_idx"),
+            index=models.Index(
+                fields=["tag"], name="posts_hasht_tag_7a6858_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="hashtag",
@@ -259,12 +271,15 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="mention",
             index=models.Index(
-                fields=["mentioned_user"], name="posts_menti_mention_f52c3d_idx"
+                fields=["mentioned_user"],
+                name="posts_menti_mention_f52c3d_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="mention",
-            index=models.Index(fields=["post"], name="posts_menti_post_id_63bd5f_idx"),
+            index=models.Index(
+                fields=["post"], name="posts_menti_post_id_63bd5f_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="mention",
@@ -280,7 +295,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="posthashtag",
             index=models.Index(
-                fields=["post", "hashtag"], name="posts_posth_post_id_cf2f78_idx"
+                fields=["post", "hashtag"],
+                name="posts_posth_post_id_cf2f78_idx",
             ),
         ),
         migrations.AddIndex(

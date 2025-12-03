@@ -15,7 +15,9 @@ class CommunityMember(models.Model):
     community = models.ForeignKey(
         Community, on_delete=models.CASCADE, related_name="members"
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="communities")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="communities"
+    )
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

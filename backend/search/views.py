@@ -16,7 +16,9 @@ class SearchView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         query = request.GET.get("q", "")
-        users = User.objects.filter(username__icontains=query).values("id", "username")
+        users = User.objects.filter(username__icontains=query).values(
+            "id", "username"
+        )
         posts = Post.objects.filter(content__icontains=query).values(
             "id", "content", "user_id"
         )

@@ -31,4 +31,6 @@ class NotificationMarkReadView(generics.UpdateAPIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         obj.is_read = True
         obj.save()
-        return Response({"message": "Marked as read"}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Marked as read"}, status=status.HTTP_200_OK
+        )

@@ -2,12 +2,12 @@ Project twitter_mvp {
   database_type: "PostgreSQL"
   note: '''
   Full Twitter MVP - Strict 3NF Schema with Retweets, Quotes, Hashtags, Mentions, Threads
-  
+
   3NF Compliance:
   - All tables have atomic values (1NF)
   - All non-key attributes depend on the whole primary key (2NF)
   - No transitive dependencies - non-key attributes depend only on the primary key (3NF)
-  
+
   Denormalization Strategy (Controlled):
   - Counts (reply_count, retweet_count, etc.) are denormalized for performance
   - Updated via Django signals to maintain consistency
@@ -28,7 +28,7 @@ Table users {
   bio text
   location varchar(100)
   website varchar(255)
-  
+
   // Profile image stored as URL (actual file in cloud storage)
   avatar_url varchar(500)
   header_url varchar(500)
@@ -43,17 +43,17 @@ Table users {
   is_verified boolean [default: false]
   is_suspended boolean [default: false]
   is_deleted boolean [default: false]
-  
+
   // Password reset and email verification tokens (stored as SHA-256 hashes)
   reset_token varchar(64) [default: '', note: 'SHA-256 hash of reset token (not plaintext)']
   email_verification_key varchar(64) [default: '', note: 'SHA-256 hash of verification key (not plaintext)']
-  
+
   indexes {
     username [unique, name: 'idx_users_username']
     email [unique, name: 'idx_users_email']
     (is_deleted, created_at) [name: 'idx_users_active']
   }
-  
+
   Note: '''
   User profile information in 3NF:
   - Each attribute depends only on user.id
@@ -78,7 +78,7 @@ Table blocks {
     blocker_id [name: 'idx_blocks_blocker']
     blocked_id [name: 'idx_blocks_blocked']
   }
-  
+
   Note: '''
   3NF: Each attribute depends only on the composite key (blocker_id, blocked_id)
   '''
@@ -92,19 +92,19 @@ Table posts {
   id int [pk, increment]
   user_id int [not null, ref: > users.id]
   content varchar(280) [note: 'Can be empty for pure retweets']
-  
+
   // Reply/Thread Support (Self-referential FKs)
   parent_post_id int [ref: > posts.id, note: 'Direct parent for reply']
   root_post_id int [ref: > posts.id, note: 'Thread root - denormalized for performance']
-  
+
   // Retweet/Quote Tweet Support
   retweet_of_id int [ref: > posts.id, note: 'Original post being retweeted/quoted']
   is_quote_tweet boolean [default: false, note: 'True if has content + retweet_of_id']
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
   is_deleted boolean [default: false]
-  
+
   // Denormalized counts for performance (updated via Django signals)
   reply_count int [default: 0]
   retweet_count int [default: 0]
@@ -123,7 +123,7 @@ Table posts {
     (is_deleted, created_at) [name: 'idx_posts_active_time']
     (root_post_id, created_at) [name: 'idx_posts_thread_time']
   }
-  
+
   Note: '''
   Post Types (determined by field combinations):
   1. Regular Post: parent_post_id=NULL, retweet_of_id=NULL
@@ -131,7 +131,7 @@ Table posts {
   3. Retweet: retweet_of_id SET, content EMPTY, is_quote_tweet=FALSE
   4. Quote Tweet: retweet_of_id SET, content HAS VALUE, is_quote_tweet=TRUE
   5. Thread Continuation: root_post_id SET, parent_post_id SET
-  
+
   3NF Compliance:
   - All attributes depend on post.id
   - root_post_id is denormalized for O(1) thread lookups (otherwise O(n) traversal)
@@ -146,11 +146,11 @@ Table posts {
 Table hashtags {
   id int [pk, increment]
   tag varchar(100) [unique, not null, note: 'Lowercase, no # symbol']
-  
+
   // Denormalized for trending/discovery (updated via signals)
   use_count int [default: 0]
   last_used_at timestamp [default: `now()`]
-  
+
   created_at timestamp [default: `now()`]
 
   indexes {
@@ -158,7 +158,7 @@ Table hashtags {
     (use_count, last_used_at) [name: 'idx_hashtags_trending']
     last_used_at [name: 'idx_hashtags_recent']
   }
-  
+
   Note: '''
   3NF: Each hashtag is a unique entity with its own attributes.
   The many-to-many relationship with posts is in post_hashtags table.
@@ -180,7 +180,7 @@ Table post_hashtags {
     hashtag_id [name: 'idx_post_hashtags_hashtag']
     post_id [name: 'idx_post_hashtags_post']
   }
-  
+
   Note: '''
   3NF: Pure junction table for M:N relationship.
   Position field allows reconstructing hashtag order if needed.
@@ -197,7 +197,7 @@ Table mentions {
   mentioned_user_id int [not null, ref: > users.id]
   mentioner_user_id int [not null, ref: > users.id]
   position int [note: 'Order of appearance in post content']
-  
+
   created_at timestamp [default: `now()`]
 
   indexes {
@@ -206,7 +206,7 @@ Table mentions {
     post_id [name: 'idx_mentions_post']
     (mentioned_user_id, created_at) [name: 'idx_mentions_user_time']
   }
-  
+
   Note: '''
   3NF: Each mention is a relationship between post and mentioned user.
   mentioner_user_id is derived from post.user_id but stored for query efficiency.
@@ -233,7 +233,7 @@ Table post_reports {
     reporter_id [name: 'idx_reports_reporter']
     (status, created_at) [name: 'idx_reports_status_time']
   }
-  
+
   Note: '3NF: Each report is independent entity with full report details'
 }
 
@@ -253,7 +253,7 @@ Table likes {
     user_id [name: 'idx_likes_user']
     (post_id, created_at) [name: 'idx_likes_post_time']
   }
-  
+
   Note: '3NF: Junction table for user-post like relationship'
 }
 
@@ -273,7 +273,7 @@ Table follows {
     following_id [name: 'idx_follows_following']
     (following_id, created_at) [name: 'idx_follows_following_time']
   }
-  
+
   Note: '''
   3NF: Pure relationship table.
   Query patterns:
@@ -296,7 +296,7 @@ Table bookmarks {
     (user_id, post_id) [unique, name: 'idx_bookmarks_unique']
     (user_id, created_at) [name: 'idx_bookmarks_user_time']
   }
-  
+
   Note: '3NF: Junction table for user-post bookmark relationship'
 }
 
@@ -308,14 +308,14 @@ Table notifications {
   id int [pk, increment]
   user_id int [not null, ref: > users.id, note: 'Recipient']
   actor_id int [ref: > users.id, note: 'Who triggered the notification']
-  
+
   verb varchar(100) [not null, note: 'liked_post, retweeted_post, quoted_post, replied_post, mentioned_user, followed_user']
   target_id int [note: 'ID of the target object (post, user, etc.)']
   target_type varchar(50) [note: 'post, user, community']
-  
+
   // Additional context for rich notifications
   related_post_id int [ref: > posts.id, note: 'The post involved in notification']
-  
+
   is_read boolean [default: false]
   created_at timestamp [default: `now()`]
 
@@ -324,7 +324,7 @@ Table notifications {
     (user_id, created_at) [name: 'idx_notif_user_time']
     (actor_id, created_at) [name: 'idx_notif_actor_time']
   }
-  
+
   Note: '''
   Notification types (verb):
   - liked_post: Someone liked your post
@@ -333,7 +333,7 @@ Table notifications {
   - replied_post: Someone replied to your post
   - mentioned_user: Someone mentioned you in a post
   - followed_user: Someone followed you
-  
+
   3NF: Generic notification entity with polymorphic target support
   '''
 }
@@ -346,7 +346,7 @@ Table user_messages {
   id int [pk, increment]
   sender_id int [not null, ref: > users.id]
   receiver_id int [not null, ref: > users.id]
-  
+
   content text [not null]
   is_read boolean [default: false]
   read_at timestamp
@@ -357,7 +357,7 @@ Table user_messages {
     (receiver_id, is_read) [name: 'idx_messages_unread']
     (receiver_id, created_at) [name: 'idx_messages_receiver_time']
   }
-  
+
   Note: '''
   3NF: Each message is independent entity.
   Conversation is derived from sender_id + receiver_id combination.
@@ -373,24 +373,24 @@ Table communities {
   name varchar(255) [not null]
   description text
   owner_id int [not null, ref: > users.id]
-  
+
   // Community settings
   is_private boolean [default: false]
   rules text
-  
+
   // Denormalized counts
   member_count int [default: 0]
   post_count int [default: 0]
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
-  
+
   indexes {
     owner_id [name: 'idx_communities_owner']
     name [name: 'idx_communities_name']
     (is_private, created_at) [name: 'idx_communities_public']
   }
-  
+
   Note: '3NF: Community is independent entity with own attributes'
 }
 
@@ -411,7 +411,7 @@ Table community_members {
     user_id [name: 'idx_comm_members_user']
     (community_id, role) [name: 'idx_comm_members_role']
   }
-  
+
   Note: '3NF: Junction table for community membership with role attribute'
 }
 
@@ -424,20 +424,20 @@ Table community_posts {
   community_id int [not null, ref: > communities.id]
   user_id int [not null, ref: > users.id]
   content text [not null]
-  
+
   // Optional: link to regular post for cross-posting
   linked_post_id int [ref: > posts.id]
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
   is_pinned boolean [default: false]
-  
+
   indexes {
     (community_id, created_at) [name: 'idx_comm_posts_time']
     (community_id, is_pinned, created_at) [name: 'idx_comm_posts_pinned']
     user_id [name: 'idx_comm_posts_user']
   }
-  
+
   Note: '3NF: Posts within a community are independent entities'
 }
 
@@ -459,7 +459,7 @@ Table login_logs {
     (ip_address, created_at) [name: 'idx_login_logs_ip_time']
     (login_success, created_at) [name: 'idx_login_logs_success']
   }
-  
+
   Note: '3NF: Each login attempt is independent audit record'
 }
 
@@ -483,7 +483,7 @@ Table user_sessions {
     (user_id, is_active) [name: 'idx_sessions_user_active']
     expires_at [name: 'idx_sessions_expiry']
   }
-  
+
   Note: 'Optional table for tracking active sessions across devices'
 }
 
@@ -494,46 +494,46 @@ Table user_sessions {
 Note optimization {
   '''
   KEY OPTIMIZATIONS:
-  
+
   1. DENORMALIZED COUNTS (Updated via Django Signals)
      Posts table: reply_count, retweet_count, like_count, quote_count, bookmark_count
      Users table: followers_count, following_count, posts_count
      Hashtags table: use_count, last_used_at
      Communities table: member_count, post_count
-     
+
      Benefits: Avoids expensive COUNT(*) queries on timeline/profile views
      Trade-off: Slight write overhead for maintaining consistency
-  
+
   2. ROOT_POST_ID DENORMALIZATION (Thread Performance)
      Purpose: O(1) thread lookups vs O(n) parent traversal
      Query: SELECT * FROM posts WHERE root_post_id = ? ORDER BY created_at
      Uses: idx_posts_thread_time index
-  
+
   3. COMPOSITE INDEXES FOR COMMON QUERIES
-     
+
      Timeline Query (Home Feed):
      SELECT p.* FROM posts p
        JOIN follows f ON p.user_id = f.following_id
        WHERE f.follower_id = ? AND p.is_deleted = false
        ORDER BY p.created_at DESC LIMIT 20
      Uses: idx_follows_follower, idx_posts_user_time
-     
+
      User Profile Posts:
      SELECT * FROM posts WHERE user_id = ? AND is_deleted = false
        ORDER BY created_at DESC
      Uses: idx_posts_user_time
-     
+
      Thread Display:
      SELECT * FROM posts WHERE root_post_id = ?
        ORDER BY created_at ASC
      Uses: idx_posts_thread_time
-     
+
      Trending Hashtags:
-     SELECT * FROM hashtags 
+     SELECT * FROM hashtags
        WHERE last_used_at >= NOW() - INTERVAL '7 days'
        ORDER BY use_count DESC LIMIT 20
      Uses: idx_hashtags_trending
-     
+
      Posts by Hashtag:
      SELECT p.* FROM posts p
        JOIN post_hashtags ph ON p.id = ph.post_id
@@ -541,40 +541,40 @@ Note optimization {
        WHERE h.tag = ? AND p.is_deleted = false
        ORDER BY p.created_at DESC
      Uses: idx_hashtags_tag, idx_post_hashtags_hashtag, idx_posts_active_time
-     
+
      User Mentions:
      SELECT p.* FROM posts p
        JOIN mentions m ON p.id = m.post_id
        WHERE m.mentioned_user_id = ?
        ORDER BY m.created_at DESC
      Uses: idx_mentions_user_time
-     
+
      Notification Inbox:
-     SELECT * FROM notifications 
-       WHERE user_id = ? 
+     SELECT * FROM notifications
+       WHERE user_id = ?
        ORDER BY is_read ASC, created_at DESC
      Uses: idx_notif_user_read_time
-     
+
      Unread Messages:
-     SELECT * FROM user_messages 
+     SELECT * FROM user_messages
        WHERE receiver_id = ? AND is_read = false
        ORDER BY created_at DESC
      Uses: idx_messages_unread
-  
+
   4. SOFT DELETE STRATEGY
      is_deleted boolean field instead of hard deletes
      Benefits: Audit trail, potential undo, referential integrity
      Indexes include is_deleted for filtered queries
-  
+
   5. 3NF COMPLIANCE VERIFICATION
      - 1NF: All columns contain atomic values ✓
      - 2NF: All non-key columns depend on entire primary key ✓
      - 3NF: No transitive dependencies - all attributes depend only on PK ✓
-     
+
      Controlled Denormalization:
      - Count fields: Updated via signals, not derived queries
      - root_post_id: Computed once on insert for efficient thread queries
-     
+
   6. PAGINATION STRATEGY
      Use keyset pagination (WHERE created_at < ?) instead of OFFSET
      Benefits: Consistent performance regardless of page number

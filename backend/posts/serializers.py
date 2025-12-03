@@ -132,7 +132,9 @@ class PostSerializer(serializers.ModelSerializer):
     def get_retweet_of_data(self, obj):
         """Get the original post data for retweets/quotes"""
         if obj.retweet_of:
-            return PostMiniSerializer(obj.retweet_of, context=self.context).data
+            return PostMiniSerializer(
+                obj.retweet_of, context=self.context
+            ).data
         return None
 
     @extend_schema_field(serializers.BooleanField())
@@ -163,7 +165,9 @@ class PostSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             from bookmarks.models import Bookmark
 
-            return Bookmark.objects.filter(user=request.user, post=obj).exists()
+            return Bookmark.objects.filter(
+                user=request.user, post=obj
+            ).exists()
         return False
 
     def create(self, validated_data):
@@ -198,9 +202,13 @@ class PostSerializer(serializers.ModelSerializer):
                 continue
 
             hashtag, _ = Hashtag.objects.get_or_create(tag=tag_normalized)
-            PostHashtag.objects.create(post=post, hashtag=hashtag, position=position)
+            PostHashtag.objects.create(
+                post=post, hashtag=hashtag, position=position
+            )
             # Update hashtag use_count
-            Hashtag.objects.filter(pk=hashtag.pk).update(use_count=F("use_count") + 1)
+            Hashtag.objects.filter(pk=hashtag.pk).update(
+                use_count=F("use_count") + 1
+            )
 
     def _process_mentions(self, post, content, user):
         """Extract mentions from content and create associations"""

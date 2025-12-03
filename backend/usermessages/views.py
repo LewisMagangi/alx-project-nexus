@@ -14,14 +14,17 @@ class MessageListSendView(generics.ListCreateAPIView):
         other_id = self.kwargs["user_id"]
         user = self.request.user
         return Message.objects.filter(
-            Q(sender=user, receiver_id=other_id) | Q(receiver=user, sender_id=other_id)
+            Q(sender=user, receiver_id=other_id)
+            | Q(receiver=user, sender_id=other_id)
         ).order_by("created_at")
 
     def create(self, request, *args, **kwargs):
         receiver_id = self.kwargs["user_id"]
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        message = serializer.save(sender=self.request.user, receiver_id=receiver_id)
+        message = serializer.save(
+            sender=self.request.user, receiver_id=receiver_id
+        )
         output_serializer = self.get_serializer(message)
         return Response(output_serializer.data, status=200)
 
