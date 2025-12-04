@@ -196,7 +196,7 @@ function ComposeContent() {
                 onChange={(e) => setContent(e.target.value)}
                 maxLength={500}
                 disabled={posting}
-                className="min-h-30 resize-none"
+                className="min-h-[120px] resize-none"
                 autoFocus
               />
 
@@ -235,7 +235,7 @@ function ComposeContent() {
 
               {/* Character count and submit */}
               <div className="flex justify-between items-center pt-2">
-                <span className={`text-sm ${content.length > 450 ? 'text-orange-500' : content.length > 480 ? 'text-red-500' : 'text-gray-500'}`}>
+                <span className={`text-sm ${content.length > 480 ? 'text-red-500' : content.length > 450 ? 'text-orange-500' : 'text-gray-500'}`}>
                   {content.length}/500
                 </span>
                 <div className="flex gap-2">
