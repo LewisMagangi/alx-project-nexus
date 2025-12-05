@@ -92,6 +92,57 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomPasswordChange'
           description: ''
+  /api/account/profile/:
+    put:
+      operationId: account_profile_update
+      description: Update profile info (bio, location, website, avatar_url, header_url)
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+    patch:
+      operationId: account_profile_partial_update
+      description: Update profile info (bio, location, website, avatar_url, header_url)
+      tags:
+      - account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
   /api/account/update/:
     put:
       operationId: account_update_update
@@ -230,7 +281,8 @@ paths:
       operationId: auth_logout_create
       description: |-
         Logout endpoint that blacklists the refresh token.
-        For JWT auth, this invalidates the refresh token so it can't be used to get new access tokens.
+        For JWT auth, this invalidates the refresh token so it can't be used
+        to get new access tokens.
       tags:
       - auth
       security:
@@ -299,6 +351,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomPasswordResetConfirm'
+          description: ''
+  /api/auth/password/reset/verify/:
+    post:
+      operationId: auth_password_reset_verify_create
+      description: |-
+        Verify email for password reset before allowing password change.
+        This prevents unauthorized password resets.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetVerification'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetVerification'
           description: ''
   /api/auth/register/:
     post:
@@ -2516,7 +2598,11 @@ components:
         new_password:
           type: string
           writeOnly: true
+        confirm_password:
+          type: string
+          writeOnly: true
       required:
+      - confirm_password
       - email
       - new_password
       - token
@@ -3034,6 +3120,18 @@ components:
           format: email
       required:
       - email
+    PasswordResetVerification:
+      type: object
+      description: Serializer for password reset email verification.
+      properties:
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+      required:
+      - email
+      - token
     PatchedAccount:
       type: object
       properties:
@@ -3232,6 +3330,32 @@ components:
           writeOnly: true
           nullable: true
           description: Post ID to quote tweet
+    PatchedProfileUpdate:
+      type: object
+      description: Serializer for updating profile information
+      properties:
+        bio:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+          maxLength: 100
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 255
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        header_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
     PatchedUserDetails:
       type: object
       description: User model w/o password
@@ -3369,6 +3493,32 @@ components:
       - user
       - user_data
       - username
+    ProfileUpdate:
+      type: object
+      description: Serializer for updating profile information
+      properties:
+        bio:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+          maxLength: 100
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 255
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        header_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
     PublicUser:
       type: object
       properties:
