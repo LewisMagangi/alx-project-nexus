@@ -200,8 +200,6 @@ class PasswordResetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
         self.assertIn('Invalid reset link', response.data['error'])
-        self.assertIn('error', response.data)
-        self.assertIn('Invalid reset link', response.data['error'])
 
     @patch('authentication.views.send_mail')
     def test_email_template_rendering(self, mock_send_mail):
