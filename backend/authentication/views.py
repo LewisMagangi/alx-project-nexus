@@ -742,42 +742,29 @@ class EmailVerificationView(generics.GenericAPIView):
                 verified_at=timezone.now()
             )
 
-            # Determine verification purpose and take appropriate action
-            if (profile.reset_token and profile.reset_token_expires and
-                    timezone.now() <= profile.reset_token_expires):
-                # Password reset verification - send actual reset email
-                reset_url = (
-                    f"{settings.FRONTEND_URL}/auth/password/reset?"
-                    f"token={profile.reset_token}&email={email}"
-                )
+            # Verification successful - mark as verified
+            profile.is_verified = True
+            profile.email_verified_at = timezone.now()
+            profile.email_verification_key = ""
+            profile.email_verification_key_expires = None
+            profile.email_verification_attempts = 0  # Reset on success
+            profile.last_verification_attempt_at = None
 
-                html_message = render_to_string('password_reset_email.html', {
-                    'reset_url': reset_url,
-                    'user': user,
-                })
-                plain_message = strip_tags(html_message)
-                send_mail(
-                    subject='Password Reset - Nexus',
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
+            # Log successful verification
+            EmailVerificationLog.objects.create(
+                user=user,
+                email=email,
+                status='verified',
+                # ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                verified_at=timezone.now()
+            )
 
-                profile.save()
-                return Response({
-                    "detail": "Email verified. Password reset link sent.",
-                    "next_action": "password_reset_email_sent"
-                })
-
-            else:
-                # Account verification - just mark as verified
-                profile.save()
-                return Response({
-                    "detail": "Email verified. Your account is now active.",
-                    "next_action": "account_activated"
-                })
+            profile.save()
+            return Response({
+                "detail": "Email verified. Your account is now active.",
+                "next_action": "account_activated"
+            })
 
         except User.DoesNotExist:
             return Response({"error": "Invalid email or key."}, status=400)
