@@ -3,6 +3,12 @@ Project twitter_mvp {
   note: '''
   Full Twitter MVP - Strict 3NF Schema with Retweets, Quotes, Hashtags, Mentions, Threads
 
+  Enhanced Email Verification System:
+  - Secure token-based verification with expiry
+  - Rate limiting and abuse prevention
+  - Complete audit trail for compliance
+  - Smart password reset flow (skip email entry for verified users)
+
   3NF Compliance:
   - All tables have atomic values (1NF)
   - All non-key attributes depend on the whole primary key (2NF)
@@ -16,50 +22,94 @@ Project twitter_mvp {
 }
 
 ///////////////////////////////////////////////////////
-// USERS
+// USERS (Django Auth User Model)
 ///////////////////////////////////////////////////////
 
 Table users {
   id int [pk, increment]
-  username varchar(50) [unique, not null]
-  email varchar(255) [unique, not null]
-  password varchar(255) [not null]
+  username varchar(150) [unique, not null, note: 'Django User.username']
+  email varchar(254) [unique, not null, note: 'Django User.email']
+  password varchar(128) [not null, note: 'Django User.password (hashed)']
 
-  bio text
-  location varchar(100)
-  website varchar(255)
+  // Django User fields
+  first_name varchar(150) [default: '', note: 'Django User.first_name']
+  last_name varchar(150) [default: '', note: 'Django User.last_name']
+  is_active boolean [default: true, note: 'Django User.is_active']
+  is_staff boolean [default: false, note: 'Django User.is_staff']
+  is_superuser boolean [default: false, note: 'Django User.is_superuser']
+  date_joined timestamp [default: `now()`, note: 'Django User.date_joined']
+  last_login timestamp [null, note: 'Django User.last_login']
 
-  // Profile image stored as URL (actual file in cloud storage)
-  avatar_url varchar(500)
-  header_url varchar(500)
+  indexes {
+    username [unique, name: 'idx_users_username']
+    email [unique, name: 'idx_users_email']
+    (is_active, date_joined) [name: 'idx_users_active']
+  }
+
+  Note: '''
+  Django Auth User Model:
+  - Core authentication fields
+  - Extended by UserProfile for additional data
+  - Password is PBKDF2 hashed by Django
+  '''
+}
+
+///////////////////////////////////////////////////////
+// USER PROFILES (Extended User Data)
+///////////////////////////////////////////////////////
+
+Table user_profiles {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id, unique, note: 'OneToOneField to User']
+
+  // Legal compliance
+  accepted_legal_policies boolean [default: false]
+
+  // Profile information
+  bio text [null]
+  location varchar(100) [null]
+  website varchar(255) [null]
+
+  // Profile images (stored as URLs)
+  avatar_url varchar(500) [null]
+  header_url varchar(500) [null]
 
   // Denormalized counts for profile display
   followers_count int [default: 0]
   following_count int [default: 0]
   posts_count int [default: 0]
 
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
+  // Account status
   is_verified boolean [default: false]
-  is_suspended boolean [default: false]
-  is_deleted boolean [default: false]
+  email_verified_at timestamp [null, note: 'When email was verified']
 
   // Password reset and email verification tokens (stored as SHA-256 hashes)
-  reset_token varchar(64) [default: '', note: 'SHA-256 hash of reset token (not plaintext)']
-  email_verification_key varchar(64) [default: '', note: 'SHA-256 hash of verification key (not plaintext)']
+  reset_token varchar(64) [default: '', note: 'SHA-256 hash of reset token']
+  reset_token_expires timestamp [null, note: 'Token expiry timestamp']
+  email_verification_key varchar(64) [default: '', note: 'SHA-256 hash of verification key']
+  email_verification_key_expires timestamp [null, note: 'Email verification key expiry timestamp']
+
+  // Verification attempt tracking
+  email_verification_attempts int [default: 0, note: 'Number of verification attempts']
+  last_verification_attempt_at timestamp [null, note: 'Last verification attempt timestamp']
 
   indexes {
-    username [unique, name: 'idx_users_username']
-    email [unique, name: 'idx_users_email']
-    (is_deleted, created_at) [name: 'idx_users_active']
+    user_id [unique, name: 'idx_user_profiles_user']
+    (is_verified, followers_count) [name: 'idx_user_profiles_verified']
+    email_verification_key_expires [name: 'idx_user_profiles_email_verification_expiry']
+    (email_verification_attempts, last_verification_attempt_at) [name: 'idx_user_profiles_verification_attempts']
   }
 
   Note: '''
-  User profile information in 3NF:
-  - Each attribute depends only on user.id
-  - Counts are denormalized but updated via signals
-  - reset_token and email_verification_key store SHA-256 hashes of tokens
-    (not plaintext) to prevent account takeover if database is compromised
+  UserProfile Model (One-to-One with User):
+  - Extended user information
+  - Legal policy acceptance tracking
+  - Social features counts
+  - Security tokens (hashed for protection)
+  - Email verification tracking with expiry and attempt limits
+  - email_verified_at: Timestamp when email was successfully verified
+  - email_verification_key_expires: Prevents stale verification links
+  - email_verification_attempts/last_verification_attempt_at: Rate limiting for verification attempts
   '''
 }
 
@@ -442,8 +492,31 @@ Table community_posts {
 }
 
 ///////////////////////////////////////////////////////
-// LOGIN LOGS (Security/Audit)
+// EMAIL VERIFICATION LOGS (Audit Trail)
 ///////////////////////////////////////////////////////
+
+Table email_verification_logs {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  email varchar(254) [not null, note: 'Email address being verified']
+  status varchar(20) [not null, note: 'sent, verified, expired, failed']
+  user_agent text
+  created_at timestamp [default: `now()`]
+  verified_at timestamp [null]
+
+  indexes {
+    (user_id, created_at) [name: 'idx_verification_logs_user_time']
+    (email, status, created_at) [name: 'idx_verification_logs_email_status']
+  }
+
+  Note: '''
+  Email Verification Audit Trail:
+  - Tracks all verification attempts and outcomes
+  - Supports rate limiting and abuse detection
+  - Purpose determined by context: reset_token presence indicates password reset verification
+  - status: sent (email sent), verified (successful), expired, failed
+  '''
+}
 
 Table login_logs {
   id int [pk, increment]
@@ -504,10 +577,33 @@ Note optimization {
      Benefits: Avoids expensive COUNT(*) queries on timeline/profile views
      Trade-off: Slight write overhead for maintaining consistency
 
-  2. ROOT_POST_ID DENORMALIZATION (Thread Performance)
-     Purpose: O(1) thread lookups vs O(n) parent traversal
-     Query: SELECT * FROM posts WHERE root_post_id = ? ORDER BY created_at
-     Uses: idx_posts_thread_time index
+  2. EMAIL VERIFICATION ENHANCEMENTS
+
+     New Fields in user_profiles:
+     - email_verified_at: Timestamp for audit trail
+     - email_verification_key_expires: Prevents replay attacks on verification links
+     - email_verification_attempts/last_verification_attempt_at: Rate limiting
+
+     Verification Flow Queries:
+     Check if user is verified: SELECT is_verified FROM user_profiles WHERE user_id = ?
+     Uses: idx_user_profiles_verified
+
+     Check expired verification keys:
+     SELECT * FROM user_profiles
+       WHERE email_verification_key_expires < NOW()
+       AND email_verification_key != ''
+     Uses: idx_user_profiles_email_verification_expiry
+
+     Rate limiting verification attempts:
+     SELECT email_verification_attempts, last_verification_attempt_at
+       FROM user_profiles WHERE user_id = ?
+     Uses: idx_user_profiles_verification_attempts
+
+     Verification Audit Trail:
+     SELECT * FROM email_verification_logs
+       WHERE user_id = ? AND status = 'verified'
+       ORDER BY created_at DESC LIMIT 1
+     Uses: idx_verification_logs_user_time
 
   3. COMPOSITE INDEXES FOR COMMON QUERIES
 
@@ -574,6 +670,12 @@ Note optimization {
      Controlled Denormalization:
      - Count fields: Updated via signals, not derived queries
      - root_post_id: Computed once on insert for efficient thread queries
+     - email_verified_at: Timestamp denormalized for verification audit (could be derived from logs)
+
+     Email Verification Design:
+     - All verification fields depend only on user_id (3NF compliant)
+     - email_verification_logs table provides full audit trail
+     - Rate limiting fields prevent abuse while maintaining performance
 
   6. PAGINATION STRATEGY
      Use keyset pagination (WHERE created_at < ?) instead of OFFSET

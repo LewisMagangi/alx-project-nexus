@@ -90,6 +90,16 @@ frontend/
 - 📱 **Responsive** - Mobile-first design with collapsible sidebar
 - 🎨 **Themes** - Modern UI with Tailwind CSS v4
 
+## ✅ Best Practices
+
+### Linting & Code Quality
+
+- **JavaScript/TypeScript code is auto-formatted with [Prettier](https://prettier.io/)**
+- **Linting is enforced with [ESLint](https://eslint.org/)**
+- **Trailing whitespace and end-of-file newlines are auto-fixed (pre-commit hooks)**
+- **Pre-commit hooks**: Run `pre-commit run --all-files` before pushing. See `.pre-commit-config.yaml` for details.
+- **Accessibility**: Use [eslint-plugin-jsx-a11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y) for accessibility linting (recommended for all React projects).
+
 ## Tech Stack
 
 - **Framework:** Next.js 15+ (App Router with Turbopack)
@@ -105,3 +115,11 @@ frontend/
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - [Shadcn UI](https://ui.shadcn.com/)
+
+## 👥 Authors
+
+See [AUTHORS](../AUTHORS) for a list of contributors.
+
+## 📝 License
+
+This project is part of the ALX Software Engineering program.
