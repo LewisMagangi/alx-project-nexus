@@ -8,6 +8,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from django.utils import timezone
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
@@ -22,9 +25,20 @@ from .serializers import (
     CustomRegisterSerializer,
     EmailVerificationSerializer,
     PasswordResetRequestSerializer,
+    PasswordResetVerificationSerializer,
     ResendVerificationSerializer,
     SocialAuthCodeSerializer,
 )
+
+
+def get_client_ip(request):
+    """Get the client IP address from the request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def hash_token(token: str) -> str:
@@ -80,6 +94,7 @@ class LoginView(generics.GenericAPIView):
 
 @extend_schema(
     tags=["auth"],
+    request=None,
     responses={
         200: {"type": "object", "properties": {"detail": {"type": "string"}}}
     },
@@ -87,11 +102,11 @@ class LoginView(generics.GenericAPIView):
 class LogoutView(generics.GenericAPIView):
     """
     Logout endpoint that blacklists the refresh token.
-    For JWT auth, this invalidates the refresh token so it can't be used to get new access tokens.
+    For JWT auth, this invalidates the refresh token so it can't be used
+    to get new access tokens.
     """
 
     permission_classes = [AllowAny]
-    serializer_class = None
 
     def post(self, request):
         try:
@@ -129,7 +144,10 @@ class GoogleLoginInitView(generics.GenericAPIView):
         client_id = os.getenv("GOOGLE_CLIENT_ID", "")
         redirect_uri = os.getenv(
             "GOOGLE_REDIRECT_URI",
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/auth/callback/google",
+            (
+                f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}"
+                "/auth/callback/google"
+            ),
         )
         params = {
             "client_id": client_id,
@@ -158,7 +176,10 @@ class GitHubLoginInitView(generics.GenericAPIView):
         client_id = os.getenv("GITHUB_CLIENT_ID", "")
         redirect_uri = os.getenv(
             "GITHUB_REDIRECT_URI",
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/auth/callback/github",
+            (
+                f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}"
+                "/auth/callback/github"
+            ),
         )
         params = {
             "client_id": client_id,
@@ -192,7 +213,10 @@ class GoogleCallbackView(generics.GenericAPIView):
         client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
         redirect_uri = os.getenv(
             "GOOGLE_REDIRECT_URI",
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/auth/callback/google",
+            (
+                f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}"
+                "/auth/callback/google"
+            ),
         )
 
         token_data = {
@@ -310,7 +334,10 @@ class GitHubCallbackView(generics.GenericAPIView):
         client_secret = os.getenv("GITHUB_CLIENT_SECRET", "")
         redirect_uri = os.getenv(
             "GITHUB_REDIRECT_URI",
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/auth/callback/github",
+            (
+                f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}"
+                "/auth/callback/github"
+            ),
         )
 
         token_data = {
@@ -429,6 +456,10 @@ class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
 
     def post(self, request):
+        from datetime import timedelta
+        from django.utils import timezone
+        from users.models import EmailVerificationLog
+
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email is required."}, status=400)
@@ -436,24 +467,53 @@ class PasswordResetRequestView(generics.GenericAPIView):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response(
-                {"detail": "If the email exists, a reset link will be sent."},
+                {
+                    "detail": "If email exists, a verification link will be "
+                    "sent.",
+                },
                 status=200,
             )
-        # Generate a reset token
+        # Generate a secure reset token
         token = get_random_string(32)
-        # Store the hashed token, not the plaintext
+        # Store hashed token with expiry timestamp
         user.profile.reset_token = hash_token(token)
+        user.profile.reset_token_expires = timezone.now() + timedelta(hours=1)
         user.profile.save()
-        # Send the plaintext token to the user via email
-        reset_url = f"{settings.FRONTEND_URL}/auth/password/reset/confirm/?token={token}&email={email}"
+
+        # Log verification email sent
+        EmailVerificationLog.objects.create(
+            user=user,
+            email=email,
+            status='sent',
+            # ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        # Build verification URL (two-step process)
+        from urllib.parse import quote
+        verification_url = (
+            f"{settings.FRONTEND_URL}/auth/password/verify?"
+            f"token={token}&email={quote(email)}"
+        )
+
+        html_message = render_to_string('password_reset_email.html', {
+            'verification_url': verification_url,
+            'user': user,
+        })
+        plain_message = strip_tags(html_message).replace('&amp;', '&')
         send_mail(
-            "Password Reset Request",
-            f"Reset your password: {reset_url}",
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
+            subject='Password Reset Request - Nexus',
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=html_message,
+            fail_silently=False,
         )
         return Response(
-            {"detail": "If the email exists, a reset link will be sent."},
+            {
+                "detail": (
+                    "If the email exists, a verification link will be sent."
+                )
+            },
             status=200,
         )
 
@@ -465,25 +525,155 @@ class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = CustomPasswordResetConfirmSerializer
 
     def post(self, request):
-        token = request.data.get("token")
-        new_password = request.data.get("new_password")
-        if not (token and new_password):
-            return Response({"error": "Missing required fields."}, status=400)
-        from users.models import UserProfile
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data.get("token")
+        new_password = serializer.validated_data.get("new_password")
+        email = serializer.validated_data.get("email")
 
-        # Hash the provided token and find the matching profile
-        token_hash = hash_token(token)
         try:
-            profile = UserProfile.objects.get(reset_token=token_hash)
-            user = profile.user
+            user = User.objects.get(email=email)
+            profile = user.profile
+            # Check expiry
+            if (
+                profile.reset_token_expires
+                and timezone.now() > profile.reset_token_expires
+            ):
+                return Response(
+                    {
+                        "error": (
+                            "Reset link has expired. Please request a new one."
+                        )
+                    },
+                    status=400,
+                )
+            # Verify token
+            if not verify_token(token, profile.reset_token):
+                return Response(
+                    {"error": "Invalid or expired reset link."},
+                    status=400,
+                )
+            # Update password
             user.set_password(new_password)
+            # Clear reset token and expiry
             profile.reset_token = ""
+            profile.reset_token_expires = None
             profile.save()
             user.save()
             return Response({"detail": "Password reset successful."})
-        except UserProfile.DoesNotExist:
-            # Do not reveal whether the token is valid
-            return Response({"error": "Invalid token."}, status=400)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid reset link."}, status=400)
+
+
+# Password Reset Email Verification
+@extend_schema(tags=["auth"], request=PasswordResetVerificationSerializer)
+class PasswordResetVerifyEmailView(generics.GenericAPIView):
+    """
+    Verify email for password reset before allowing password change.
+    This prevents unauthorized password resets.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = PasswordResetVerificationSerializer
+
+    def post(self, request):
+        from django.utils import timezone
+        from users.models import EmailVerificationLog
+        import threading
+
+        email = request.data.get("email")
+        token = request.data.get("token")
+        if not (email and token):
+            return Response(
+                {"error": "Email and token are required."},
+                status=400
+            )
+        try:
+            user = User.objects.get(email=email)
+            profile = user.profile
+
+            # Verify token hasn't expired
+            if (
+                profile.reset_token_expires
+                and timezone.now() > profile.reset_token_expires
+            ):
+                # Log expired attempt asynchronously
+                threading.Thread(
+                    target=lambda: EmailVerificationLog.objects.create(
+                        user=user,
+                        email=email,
+                        status='expired',
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    ),
+                    daemon=True
+                ).start()
+                return Response(
+                    {"error": "Reset link has expired. "
+                              "Please request a new one."},
+                    status=400
+                )
+
+            # Verify token matches
+            if not verify_token(token, profile.reset_token):
+                # Log failed attempt asynchronously
+                threading.Thread(
+                    target=lambda: EmailVerificationLog.objects.create(
+                        user=user,
+                        email=email,
+                        status='failed',
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    ),
+                    daemon=True
+                ).start()
+                return Response(
+                    {"error": "Invalid or expired reset link."},
+                    status=400
+                )
+
+            # Verification successful - handle everything asynchronously
+            def handle_successful_verification():
+                # Send password reset email
+                reset_url = (
+                    f"{settings.FRONTEND_URL}/auth/password/reset/confirm?"
+                    f"token={token}&email={email}"
+                )
+
+                html_message = render_to_string('password_reset_email.html', {
+                    'verification_url': reset_url,
+                    'user': user,
+                })
+                plain_message = strip_tags(html_message).replace('&amp;', '&')
+                send_mail(
+                    subject='Password Reset - Nexus',
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    html_message=html_message,
+                    fail_silently=True,  # Don't crash if email fails
+                )
+                # Log successful verification
+                EmailVerificationLog.objects.create(
+                    user=user,
+                    email=email,
+                    status='verified',
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    verified_at=timezone.now()
+                )
+
+            # Start background thread for email and logging
+            success_thread = threading.Thread(
+                target=handle_successful_verification,
+                daemon=True
+            )
+            success_thread.start()
+
+            # Return response immediately
+            return Response({
+                "detail": "Email verified. Password reset link sent.",
+                "next_action": "check_email_for_reset_link"
+            })
+
+        except User.DoesNotExist:
+            return Response({"error": "Invalid reset link."}, status=400)
 
 
 # Email Verification
@@ -493,21 +683,102 @@ class EmailVerificationView(generics.GenericAPIView):
     serializer_class = EmailVerificationSerializer
 
     def post(self, request):
+        from django.utils import timezone
+        from users.models import EmailVerificationLog
+
         email = request.data.get("email")
         key = request.data.get("key")
         if not (email and key):
             return Response({"error": "Missing required fields."}, status=400)
+
         try:
             user = User.objects.get(email=email)
+            profile = user.profile
+
             # Verify using secure hash comparison
-            if not verify_token(key, user.profile.email_verification_key):
+            if not verify_token(key, profile.email_verification_key):
+                # Log failed verification attempt
+                EmailVerificationLog.objects.create(
+                    user=user,
+                    email=email,
+                    status='failed',
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
                 return Response(
                     {"error": "Invalid verification key."}, status=400
                 )
-            user.profile.is_verified = True
-            user.profile.email_verification_key = ""
-            user.profile.save()
-            return Response({"detail": "Email verified successfully."})
+
+            # Check if verification key has expired
+            if (profile.email_verification_key_expires and
+                    timezone.now() > profile.email_verification_key_expires):
+                # Log expired verification attempt
+                EmailVerificationLog.objects.create(
+                    user=user,
+                    email=email,
+                    status='expired',
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+                return Response(
+                    {"error": "Verification link has expired."}, status=400
+                )
+
+            # Verification successful - determine next action based on context
+            profile.is_verified = True
+            profile.email_verified_at = timezone.now()
+            profile.email_verification_key = ""
+            profile.email_verification_key_expires = None
+            profile.email_verification_attempts = 0  # Reset on success
+            profile.last_verification_attempt_at = None
+
+            # Log successful verification
+            EmailVerificationLog.objects.create(
+                user=user,
+                email=email,
+                status='verified',
+                # ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                verified_at=timezone.now()
+            )
+
+            # Determine verification purpose and take appropriate action
+            if (profile.reset_token and profile.reset_token_expires and
+                    timezone.now() <= profile.reset_token_expires):
+                # Password reset verification - send actual reset email
+                reset_url = (
+                    f"{settings.FRONTEND_URL}/auth/password/reset?"
+                    f"token={profile.reset_token}&email={email}"
+                )
+
+                html_message = render_to_string('password_reset_email.html', {
+                    'reset_url': reset_url,
+                    'user': user,
+                })
+                plain_message = strip_tags(html_message)
+                send_mail(
+                    subject='Password Reset - Nexus',
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+
+                profile.save()
+                return Response({
+                    "detail": "Email verified. Password reset link sent.",
+                    "next_action": "password_reset_email_sent"
+                })
+
+            else:
+                # Account verification - just mark as verified
+                profile.save()
+                return Response({
+                    "detail": "Email verified. Your account is now active.",
+                    "next_action": "account_activated"
+                })
+
         except User.DoesNotExist:
             return Response({"error": "Invalid email or key."}, status=400)
 
@@ -519,22 +790,62 @@ class ResendVerificationEmailView(generics.GenericAPIView):
     serializer_class = ResendVerificationSerializer
 
     def post(self, request):
+        from users.models import EmailVerificationLog
+        from django.utils import timezone
+
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email is required."}, status=400)
         try:
             user = User.objects.get(email=email)
-            if user.profile.is_verified:
+            profile = user.profile
+
+            if profile.is_verified:
                 return Response(
                     {"detail": "Email already verified."}, status=200
                 )
+
+            # Rate limiting: Check attempts in last hour
+            one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
+            recent_attempts = profile.email_verification_attempts
+            if (profile.last_verification_attempt_at and
+                    profile.last_verification_attempt_at > one_hour_ago):
+                recent_attempts += 1
+
+            if recent_attempts >= 3:  # Max 3 attempts per hour
+                return Response(
+                    {"error": "Too many verification attempts. "
+                     "Try again later."},
+                    status=429
+                )
+
+            # Update attempt tracking
+            profile.email_verification_attempts = recent_attempts + 1
+            profile.last_verification_attempt_at = timezone.now()
+
             # Generate verification key
             key = get_random_string(32)
             # Store the hashed key, not the plaintext
-            user.profile.email_verification_key = hash_token(key)
-            user.profile.save()
+            profile.email_verification_key = hash_token(key)
+            profile.email_verification_key_expires = (
+                timezone.now() + timezone.timedelta(hours=24)
+            )
+            profile.save()
+
+            # Log verification email sent
+            EmailVerificationLog.objects.create(
+                user=user,
+                email=email,
+                status='sent',
+                # ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+
             # Send the plaintext key to the user via email
-            verify_url = f"{settings.FRONTEND_URL}/auth/verify-email/?key={key}&email={email}"
+            verify_url = (
+                f"{settings.FRONTEND_URL}/auth/verify-email/{key}/"
+                f"?email={email}"
+            )
             send_mail(
                 "Verify your email",
                 f"Verify your email: {verify_url}",
@@ -545,7 +856,10 @@ class ResendVerificationEmailView(generics.GenericAPIView):
         except User.DoesNotExist:
             return Response(
                 {
-                    "detail": "If the email exists, a verification link will be sent."
+                    "detail": (
+                        "If the email exists, a verification link will be "
+                        "sent."
+                    )
                 },
                 status=200,
             )
