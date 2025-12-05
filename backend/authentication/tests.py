@@ -78,7 +78,8 @@ class PasswordResetTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('detail', response.data)
-        self.assertIn('Email verified successfully', response.data['detail'])
+        expected_message = 'Email verified. Password reset link sent.'
+        self.assertIn(expected_message, response.data['detail'])
 
         # Check that token is still valid after verification
         self.user_profile.refresh_from_db()
