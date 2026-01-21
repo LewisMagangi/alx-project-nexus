@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/Sidebar';
-import { Menu } from 'lucide-react';
+import { Menu, Feather } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -58,6 +58,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className={`flex-1 bg-gray-50 transition-all duration-300 ${sidebarOpen && user ? 'lg:ml-72' : ''}`}>
           {children}
         </main>
+
+        {/* Floating Action Button for Compose */}
+        {user && (
+          <Link href="/compose">
+            <button
+              className="fixed bottom-6 right-6 z-50 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              aria-label="Compose new post"
+            >
+              <Feather className="w-6 h-6" />
+            </button>
+          </Link>
+        )}
       </div>
     </>
   );
