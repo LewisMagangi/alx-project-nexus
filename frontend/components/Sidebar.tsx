@@ -125,11 +125,11 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           {user && (
             <div className="flex items-center space-x-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
-                {user.username[0].toUpperCase()}
+                {(user.username?.[0]?.toUpperCase()) || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{user.username}</p>
-                <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                <p className="text-sm font-semibold text-gray-900 truncate">{user.username || 'User'}</p>
+                <p className="text-xs text-gray-600 truncate">{user.email || ''}</p>
               </div>
             </div>
           )}
