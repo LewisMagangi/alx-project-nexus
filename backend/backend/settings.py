@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -378,12 +379,20 @@ EMAIL_BACKEND = os.getenv(
 # Email configuration
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_USE_TLS = (
-    os.getenv("EMAIL_USE_TLS", "True").lower() in ["true", "1", "yes"]
-)
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in [
+    "true",
+    "1",
+    "yes",
+]
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@nexus.com")
 
 # Password reset timeout (1 hour)
 PASSWORD_RESET_TIMEOUT = 3600
+
+# JWT Configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),  # 1hr for social platforms
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),  # 30d for persistent login
+}
