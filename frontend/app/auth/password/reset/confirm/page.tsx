@@ -56,6 +56,7 @@ function PasswordResetConfirmContent() {
           email,
           token,
           new_password: newPassword,
+          confirm_password: confirmPassword,
         }),
       });
 

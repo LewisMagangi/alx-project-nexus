@@ -76,6 +76,14 @@ class CustomPasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data.get('new_password') != data.get('confirm_password'):
+            raise serializers.ValidationError(
+                {"error": "Passwords do not match"}
+            )
+        return data
 
 
 class EmailVerificationSerializer(serializers.Serializer):
@@ -83,6 +91,13 @@ class EmailVerificationSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
     key = serializers.CharField()
+
+
+class PasswordResetVerificationSerializer(serializers.Serializer):
+    """Serializer for password reset email verification."""
+
+    email = serializers.EmailField()
+    token = serializers.CharField()
 
 
 class ResendVerificationSerializer(serializers.Serializer):

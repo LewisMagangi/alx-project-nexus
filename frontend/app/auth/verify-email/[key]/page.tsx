@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
@@ -13,14 +13,35 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 export default function EmailVerificationPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
+  const key = params.key as string;
+  const email = searchParams.get('email');
+
+  // Handle case where parameters are missing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!key && status === "loading") {
+        setStatus("error");
+        setMessage("Invalid or missing verification parameters.");
+      }
+    }, 1000); // Wait 1 second for parameters to load
+
+    return () => clearTimeout(timer);
+  }, [key, status]);
+
   useEffect(() => {
     const verifyEmail = async () => {
+      if (!key || !email) {
+        return;
+      }
+
       try {
         await axios.post(`${API_BASE_URL}/api/auth/verify-email/`, {
-          key: params.key,
+          key,
+          email,
         });
         setStatus('success');
         setMessage('Your email has been verified successfully!');
@@ -31,10 +52,10 @@ export default function EmailVerificationPage() {
       }
     };
 
-    if (params.key) {
+    if (key && email) {
       verifyEmail();
     }
-  }, [params.key, router]);
+  }, [key, email, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">

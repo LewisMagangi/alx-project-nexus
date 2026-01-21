@@ -66,36 +66,18 @@ backend/
    venv\Scripts\activate
 
    # macOS/Linux
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**:
-
-   ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables**:
-
-   ```bash
-   cp .env.example .env
-   # Edit .env - most settings are optional for development
-   # The defaults work out of the box!
-   ```
-
-5. **Run migrations**:
-
-   ```bash
    python manage.py migrate
-   ```
 
-6. **Create superuser** (optional):
+6.**Create superuser** (optional):
 
    ```bash
    python manage.py createsuperuser
    ```
 
-7. **Run development server**:
+7.**Run development server**:
 
    ```bash
    python manage.py runserver
@@ -244,6 +226,16 @@ pytest --cov=. --cov-report=html
 pytest tests/test_posts.py
 ```
 
+## ✅ Best Practices
+
+### Linting & Code Quality
+
+- **Python code is auto-formatted with [Black](https://black.readthedocs.io/en/stable/)** (see pre-commit config)
+- **Imports are sorted with [isort](https://pycqa.github.io/isort/)**
+- **Linting is enforced with [Flake8](https://flake8.pycqa.org/en/latest/)**
+- **Trailing whitespace and end-of-file newlines are auto-fixed (pre-commit hooks)**
+- **Pre-commit hooks**: Run `pre-commit run --all-files` before pushing. See `.pre-commit-config.yaml` for details.
+
 ## 🚀 Deployment (Render)
 
 1. **Create new Web Service** on Render
@@ -329,6 +321,10 @@ CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
 CSRF_TRUSTED_ORIGINS=https://*.vercel.app,https://*.onrender.com
 FRONTEND_URL=https://your-frontend.vercel.app
 ```
+
+## 👥 Authors
+
+See [AUTHORS](../AUTHORS) for a list of contributors.
 
 ## 📝 License
 
